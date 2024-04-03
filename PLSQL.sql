@@ -109,8 +109,8 @@ begin
     insert into abonos values (seq_abonos.nextval, '12345678A',10);
     insert into abonos values (seq_abonos.nextval, '11111111B',0);
     
-    insert into eventos values ( seq_eventos.nextval, 'concierto_la_moda', date '2023-6-27', 200);
-    insert into eventos values ( seq_eventos.nextval, 'teatro_impro', date '2023-7-1', 50);
+    insert into eventos values ( seq_eventos.nextval, 'concierto_la_moda', date '2024-6-27', 200);
+    insert into eventos values ( seq_eventos.nextval, 'teatro_impro', date '2024-7-1', 50);
 
     commit;
 end;
