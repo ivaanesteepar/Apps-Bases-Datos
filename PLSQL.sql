@@ -50,7 +50,8 @@ create table reservas(
 -- Procedimiento a implementar para realizar la reserva
 create or replace procedure reservar_evento( arg_NIF_cliente varchar,
  arg_nombre_evento varchar, arg_fecha date) is
- -- Declaración de excepciones
+ 
+  -- Declaración de excepciones
   EVENTO_PASADO exception;
   pragma exception_init(EVENTO_PASADO, -20001);
   msg_evento_pasado constant varchar(90) := 'No se pueden reservar el evento ' || arg_nombre_evento || ', pues ya ha pasado';
