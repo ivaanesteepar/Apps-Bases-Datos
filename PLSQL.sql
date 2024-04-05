@@ -50,11 +50,32 @@ create table reservas(
 -- Procedimiento a implementar para realizar la reserva
 create or replace procedure reservar_evento( arg_NIF_cliente varchar,
  arg_nombre_evento varchar, arg_fecha date) is
-	vFecha eventos.fecha%type;
+ --Declaración de excepciones
+  EVENTO_PASADO exception;
+  pragma exception_init(EVENTO_PASADO, -20001);
+  msg_evento_pasado constant varchar(90) := 'No se pueden reservar el evento ' || arg_nombre_evento || ', pues ya ha pasado';
+  
+
+  CLIENTE_INEXISTENTE exception;
+  pragma exception_init(CLIENTE_INEXISTENTE, -20002);
+  msg_cliente_inexistente constant varchar(50) := 'Cliente inexistente';
+  
+  
+  EVENTO_INEXISTENTE exception;
+  pragma exception_init(EVENTO_INEXISTENTE, -20003);
+  msg_evento_inexistente constant varchar(50) := 'El evento ' || arg_nombre_evento || ' no existe';
+  
+  
+  SALDO_INSUFICIENTE exception;
+  pragma exception_init(SALDO_INSUFICIENTE, -20004);
+  msg_saldo_insuficiente constant varchar(50) := 'Saldo en abono insuficiente';
+  
+  vFecha eventos.fecha%type;
   	vAsientos eventos.asientos_disponibles%type;
   	vNIF clientes.NIF%type;
  	vSaldo abonos.saldo%type;
   	vIdevento eventos.id_evento%type;
+    
  begin
   null;
 end;
@@ -142,8 +163,8 @@ begin
     insert into abonos values (seq_abonos.nextval, '12345678A',10);
     insert into abonos values (seq_abonos.nextval, '11111111B',0);
     
-    insert into eventos values ( seq_eventos.nextval, 'concierto_la_moda', date '2023-6-27', 200);
-    insert into eventos values ( seq_eventos.nextval, 'teatro_impro', date '2023-7-1', 50);
+    insert into eventos values ( seq_eventos.nextval, 'concierto_la_moda', date '2024-6-27', 200);
+    insert into eventos values ( seq_eventos.nextval, 'teatro_impro', date '2024-7-1', 50);
 
     commit;
 end;
