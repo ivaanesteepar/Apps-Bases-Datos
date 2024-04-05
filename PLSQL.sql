@@ -179,7 +179,31 @@ begin
 	 
   --caso 1 Reserva correcta, se realiza
   begin
-    inicializa_test;
+    inicializa_test();
+        
+    DBMS_OUTPUT.PUT_LINE('T1');
+        
+    reservar_evento('12345678A', 'teatro_impro', DATE '2023-07-1');
+        
+    SELECT COUNT(*) INTO filas
+    FROM reservas JOIN eventos ON (id_evento = evento)
+    WHERE nombre_evento = 'teatro_impro'
+    AND eventos.fecha = DATE '2023-07-1' AND reservas.cliente = '12345678A';
+       
+    COMMIT;
+        
+    --Comprobar que se ha hecho la reserva
+    IF filas = 0 THEN   
+        DBMS_OUTPUT.PUT_LINE('MAL: No da error pero no hace la reserva correctamente.');
+    ELSE 
+        DBMS_OUTPUT.PUT_LINE('BIEN: Reserva correcta.');
+    END IF;  
+    EXCEPTION
+      WHEN OTHERS THEN
+        ROLLBACK;
+        DBMS_OUTPUT.PUT_LINE('Error en Evento: ' || SQLCODE || ' - ' || SQLERRM);
+    END;
+    
   end;
   
   
@@ -211,3 +235,5 @@ end;
 
 set serveroutput on;
 exec test_reserva_evento;
+
+select * from reservas;
