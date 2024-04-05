@@ -77,16 +77,44 @@ end;
 /
 
 ------ Deja aquí tus respuestas a las preguntas del enunciado:
--- * P4.1
---
--- * P4.2
---
--- * P4.3
---
--- * P4.4
---
--- * P4.5
--- 
+/* P4.1: El resultado de la comprobación del paso 2 ¿sigue siendo fiable en el paso 3?
+
+En el procedimiento 'test_reserva_evento', el paso 2 verifica si el sistema detecta correctamente un evento pasado cuando
+se intenta hacer una reserva. En este caso, se reserva un evento con una fecha posterior a la fecha actual (DATE '2024-06-28'),
+y se espera que el sistema genere un error indicando que el evento ya ha pasado. El manejo de esta situación se encuentra dentro
+del bloque EXCEPTION correspondiente, donde se espera que se produzca un error con el código -20001, que indica que el evento ha pasado.
+
+En el paso 3, se verifica si el sistema detecta correctamente un evento inexistente cuando se intenta hacer una reserva. Para este caso,
+se intenta reservar un evento que no existe, y se espera que el sistema genere un error con el código -20003, que indica que el evento no existe.
+
+Ambas pruebas son independientes entre sí, ya que están diseñadas para verificar diferentes aspectos del procedimiento reservar_evento.
+Por lo tanto, el resultado de la comprobación en el paso 2 no afecta la fiabilidad de la comprobación en el paso 3, y viceversa. Cada paso
+evalúa una condición específica y el comportamiento esperado del sistema frente a esa condición.
+	
+P4.2:En el paso 3, la ejecución concurrente del mismo procedimiento reservar_evento con, quizás otros o los mimos argumentos,
+¿podría habernos añadido una reserva no recogida en esa SELECT que fuese incompatible con nuestra reserva?, ¿por qué?
+
+Sí, la ejecución concurrente del mismo procedimiento reservar_evento con los mismos argumentos o incluso argumentos diferentes podría haber
+añadido una reserva no recogida en la sentencia SELECT dentro del paso 3, y esta reserva podría ser incompatible con la reserva que
+estamos intentando hacer. Esto se debe a que las operaciones dentro de una base de datos pueden ser concurrentes y no bloqueantes.
+
+Dentro del procedimiento reservar_evento, primero se realiza una consulta para verificar la existencia del evento y obtener detalles
+relevantes. Sin embargo, entre el momento en que se realiza esta consulta y el momento en que se intenta hacer la reserva, otra instancia
+del procedimiento reservar_evento podría haber ejecutado y completado una reserva para el mismo evento, agotando los asientos disponibles.
+Esto daría como resultado que nuestra consulta no recoja esta nueva reserva incompatible.
+
+Por lo tanto, aunque nuestro procedimiento de reserva intenta verificar la existencia del evento y la disponibilidad de asientos antes de
+hacer la reserva, no hay una garantía completa de que la reserva será exitosa si otras transacciones concurrentes modifican los datos relevantes
+entre las consultas y las actualizaciones en nuestro procedimiento. Este tipo de situación se conoce como una "condición de carrera" y es importante
+tenerla en cuenta al diseñar sistemas que manejen operaciones concurrentes en bases de datos.
+
+P4.3
+
+P4.4
+
+P4.5
+
+*/
 
 
 create or replace
