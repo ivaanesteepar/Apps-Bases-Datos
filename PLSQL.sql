@@ -70,14 +70,13 @@ create or replace procedure reservar_evento( arg_NIF_cliente varchar,
   pragma exception_init(SALDO_INSUFICIENTE, -20004);
   msg_saldo_insuficiente constant varchar(50) := 'Saldo en abono insuficiente';
   
-  vFecha eventos.fecha%type;
+  	vFecha eventos.fecha%type;
   	vAsientos eventos.asientos_disponibles%type;
   	vNIF clientes.NIF%type;
  	vSaldo abonos.saldo%type;
   	vIdevento eventos.id_evento%type;
     
  begin
-  null;
 end;
 /
 
