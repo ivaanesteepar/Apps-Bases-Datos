@@ -50,6 +50,11 @@ create table reservas(
 -- Procedimiento a implementar para realizar la reserva
 create or replace procedure reservar_evento( arg_NIF_cliente varchar,
  arg_nombre_evento varchar, arg_fecha date) is
+	vFecha eventos.fecha%type;
+  	vAsientos eventos.asientos_disponibles%type;
+  	vNIF clientes.NIF%type;
+ 	vSaldo abonos.saldo%type;
+  	vIdevento eventos.id_evento%type;
  begin
   null;
 end;
