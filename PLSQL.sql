@@ -115,11 +115,13 @@ hacer la reserva, no hay una garantía completa de que la reserva será exitosa 
 entre las consultas y las actualizaciones en nuestro procedimiento. Este tipo de situación se conoce como una "condición de carrera" y es importante
 tenerla en cuenta al diseñar sistemas que manejen operaciones concurrentes en bases de datos.
 
-P4.3
+P4.3: ¿Qué estrategia de programación has utilizado?
 
-P4.4
+Principalmente es procedimental y basada en SQL.
 
-P4.5
+P4.4: ¿Cómo puede verse este hecho en tu código?
+
+P4.5: ¿De qué otro modo crees que podrías resolver el problema propuesto? Incluye el pseudocódigo.
 
 */
 
