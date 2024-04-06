@@ -92,7 +92,25 @@ create or replace procedure reservar_evento( arg_NIF_cliente varchar,
     where NIF = arg_NIF_cliente;
 
 
+    --Comprobamos que el evento existe
+    EXCEPTION
+      WHEN NO_DATA_FOUND THEN
+        ROLLBACK;
+          IF vFecha IS NULL THEN
+            RAISE_APPLICATION_ERROR(-20003, msg_evento_inexistente);
+          END IF;
+            
+          IF vNIF is NULL then
+            RAISE_APPLICATION_ERROR(-20002, msg_cliente_inexistente);
+          END IF;
+            
+      WHEN OTHERS THEN
+        ROLLBACK;
+        RAISE;
+  END;
 
+
+    
 
 
 
