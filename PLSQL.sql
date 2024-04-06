@@ -80,6 +80,21 @@ create or replace procedure reservar_evento( arg_NIF_cliente varchar,
   vIdevento eventos.id_evento%type;
     
  begin
+ 
+  begin
+    select eventos.fecha, eventos.asientos_disponibles into vFecha, vAsientos
+    from eventos where eventos.nombre_evento = arg_nombre_evento;
+
+              
+    select NIF, saldo into vNIF, vSaldo
+    from clientes join abonos on (NIF = cliente)
+    where NIF = arg_NIF_cliente;
+
+
+
+
+
+
 end;
 /
 
