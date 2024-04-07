@@ -85,13 +85,12 @@ create or replace procedure reservar_evento( arg_NIF_cliente varchar,
     select eventos.fecha, eventos.asientos_disponibles into vFecha, vAsientos
     from eventos where eventos.nombre_evento = arg_nombre_evento;
 
-
     select NIF, saldo into vNIF, vSaldo
     from clientes join abonos on (NIF = cliente)
     where NIF = arg_NIF_cliente;
 
 
-    --Comprobamos que el evento existe y el cliente existen
+    -- Comprobamos que el evento y cliente existen
     EXCEPTION
       WHEN NO_DATA_FOUND THEN
         ROLLBACK;
@@ -106,39 +105,42 @@ create or replace procedure reservar_evento( arg_NIF_cliente varchar,
       WHEN OTHERS THEN
         ROLLBACK;
         RAISE;
-  END;
+    END;
 
-    --Comprobamos que el cliente tiene saldo
+    -- Comprobamos que el cliente tiene saldo
     if vSaldo <= 0 then
       raise_application_error(-20004, msg_saldo_insuficiente);
     end if;
 
-    --Comprobamos que el evento no ha pasado    
+    -- Comprobamos que el evento no ha pasado    
     IF trunc(vFecha) < trunc(arg_fecha) THEN
       RAISE_APPLICATION_ERROR(-20001, msg_evento_pasado);
     end if;
         
 
-    --Hacemos la reserva:
-     --actualizamos el saldo del cliente 
+    -- Hacemos la reserva:
+    -- Actualizamos el saldo del cliente 
     update abonos set saldo = saldo-1 
     where cliente = arg_NIF_cliente;
-     --actualizamos los asientos disponibles del evento
+
+    -- Actualizamos los asientos disponibles del evento
     update eventos set asientos_disponibles = asientos_disponibles-1 
     where nombre_evento = arg_nombre_evento;
-     --consulta para obtener el id del evento y poder realizar la reserva
+
+    -- Consulta para obtener el id del evento y poder realizar la reserva
     select id_evento into vIdevento
     from eventos
     where nombre_evento = arg_nombre_evento;
-    
-     --realización de la reserva (inserción de los argumentos en la tabla reservas)
+
+
+    -- Realización de la reserva (inserción de los argumentos en la tabla reservas)
     insert into reservas (id_reserva, cliente, evento, fecha) VALUES (seq_reservas.nextval, arg_NIF_cliente, vIdevento, arg_fecha); 
 
-    -- Si se ha hecho la reserva, se guardan los cambios
+    -- Si se ha hecho la reserva, comprobamos que se han guardado los cambios
     if sql%rowcount = 1 then 
-     COMMIT;
+      COMMIT;
     else
-     ROLLBACK;
+      ROLLBACK;
     end if;
 
 end;
@@ -182,7 +184,28 @@ Principalmente es procedimental y basada en SQL.
 
 P4.4: ¿Cómo puede verse este hecho en tu código?
 
+Uso excesivo de procedimientos almacenados, manejo de excepciones, instrucciones SQL integradas, control de transacciones y pruebas automatizadas.
+
 P4.5: ¿De qué otro modo crees que podrías resolver el problema propuesto? Incluye el pseudocódigo.
+
+Otra forma de resolver el problema podría ser implementar un mecanismo de bloqueo para evitar que varias transacciones intenten reservar el mismo evento simultáneamente. 
+Esto se podría lograr utilizando bloqueos de fila o de tabla durante la operación de reserva. Esto ayuda a evitar problemas de concurrencia al garantizar que las 
+operaciones de comprobación y actualización se realicen de manera segura y consistente.
+El pseudocódigo para esta alternativa podría ser:
+
+-- Inicio de la transacción
+begin
+  -- Bloquear la fila correspondiente al evento para evitar que otras transacciones la modifiquen
+  select id_evento, asientos_disponibles into vIdevento, vAsientosDisp
+  from evento
+  where nombre_evento = arg_nombre_evento and fecha = arg_fecha
+  for update; --bloqueo explícito
+  -- Realizar las comprobaciones y operaciones de reserva como en el procedimiento original
+  -- Confirmar la transacción y liberar los bloqueos
+  commit;
+exception
+  -- Manejo de excepciones como en el procedimiento original
+end;
 
 */
 
