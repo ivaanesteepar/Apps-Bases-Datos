@@ -90,7 +90,7 @@ create or replace procedure reservar_evento( arg_NIF_cliente varchar,
     where NIF = arg_NIF_cliente;
 
 
-    --Comprobamos que el evento y cliente existen
+    -- Comprobamos que el evento y cliente existen
     EXCEPTION
       WHEN NO_DATA_FOUND THEN
         ROLLBACK;
@@ -105,35 +105,35 @@ create or replace procedure reservar_evento( arg_NIF_cliente varchar,
       WHEN OTHERS THEN
         ROLLBACK;
         RAISE;
-  END;
+    END;
 
-    --Comprobamos que el cliente tiene saldo
+    -- Comprobamos que el cliente tiene saldo
     if vSaldo <= 0 then
       raise_application_error(-20004, msg_saldo_insuficiente);
     end if;
 
-    --Comprobamos que el evento no ha pasado    
+    -- Comprobamos que el evento no ha pasado    
     IF trunc(vFecha) < trunc(arg_fecha) THEN
       RAISE_APPLICATION_ERROR(-20001, msg_evento_pasado);
     end if;
         
 
-    --Hacemos la reserva:
-    --Actualizamos el saldo del cliente 
+    -- Hacemos la reserva:
+    -- Actualizamos el saldo del cliente 
     update abonos set saldo = saldo-1 
     where cliente = arg_NIF_cliente;
 
-     --Actualizamos los asientos disponibles del evento
+    -- Actualizamos los asientos disponibles del evento
     update eventos set asientos_disponibles = asientos_disponibles-1 
     where nombre_evento = arg_nombre_evento;
 
-     --Consulta para obtener el id del evento y poder realizar la reserva
+    -- Consulta para obtener el id del evento y poder realizar la reserva
     select id_evento into vIdevento
     from eventos
     where nombre_evento = arg_nombre_evento;
 
 
-    --Realización de la reserva (inserción de los argumentos en la tabla reservas)
+    -- Realización de la reserva (inserción de los argumentos en la tabla reservas)
     insert into reservas (id_reserva, cliente, evento, fecha) VALUES (seq_reservas.nextval, arg_NIF_cliente, vIdevento, arg_fecha); 
 
     -- Si se ha hecho la reserva, comprobamos que se han guardado los cambios
