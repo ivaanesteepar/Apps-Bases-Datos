@@ -9,7 +9,6 @@ drop sequence seq_reservas;
 
 
 -- Creación de tablas y secuencias
-
 create table clientes(
 	NIF	varchar(9) primary key,
 	nombre	varchar(20) not null,
@@ -50,7 +49,8 @@ create table reservas(
 -- Procedimiento a implementar para realizar la reserva
 create or replace procedure reservar_evento( arg_NIF_cliente varchar,
  arg_nombre_evento varchar, arg_fecha date) is
- --Declaración de excepciones
+ 
+  -- Declaración de excepciones
   EVENTO_PASADO exception;
   pragma exception_init(EVENTO_PASADO, -20001);
   msg_evento_pasado constant varchar(90) := 'No se pueden reservar el evento ' || arg_nombre_evento || ', pues ya ha pasado';
@@ -69,15 +69,58 @@ create or replace procedure reservar_evento( arg_NIF_cliente varchar,
   SALDO_INSUFICIENTE exception;
   pragma exception_init(SALDO_INSUFICIENTE, -20004);
   msg_saldo_insuficiente constant varchar(50) := 'Saldo en abono insuficiente';
+
   
+  -- Definición de variables
   vFecha eventos.fecha%type;
-  	vAsientos eventos.asientos_disponibles%type;
-  	vNIF clientes.NIF%type;
- 	vSaldo abonos.saldo%type;
-  	vIdevento eventos.id_evento%type;
+  vAsientos eventos.asientos_disponibles%type;
+  vNIF clientes.NIF%type;
+  vSaldo abonos.saldo%type;
+  vIdevento eventos.id_evento%type;
     
  begin
-  null;
+ 
+  begin
+	 
+    select eventos.fecha, eventos.asientos_disponibles into vFecha, vAsientos
+    from eventos where eventos.nombre_evento = arg_nombre_evento;
+
+
+    select NIF, saldo into vNIF, vSaldo
+    from clientes join abonos on (NIF = cliente)
+    where NIF = arg_NIF_cliente;
+
+
+    --Comprobamos que el evento existe
+    EXCEPTION
+      WHEN NO_DATA_FOUND THEN
+        ROLLBACK;
+          IF vFecha IS NULL THEN
+            RAISE_APPLICATION_ERROR(-20003, msg_evento_inexistente);
+          END IF;
+            
+          IF vNIF is NULL then
+            RAISE_APPLICATION_ERROR(-20002, msg_cliente_inexistente);
+          END IF;
+            
+      WHEN OTHERS THEN
+        ROLLBACK;
+        RAISE;
+  END;
+
+    --Comprobamos que el cliente tiene saldo
+    if vSaldo <= 0 then
+      raise_application_error(-20004, msg_saldo_insuficiente);
+    end if;
+
+    --Comprobamos que el evento no ha pasado    
+    IF trunc(vFecha) < trunc(arg_fecha) THEN
+      RAISE_APPLICATION_ERROR(-20001, msg_evento_pasado);
+    end if;
+        
+
+
+
 end;
 /
 
@@ -113,11 +156,13 @@ hacer la reserva, no hay una garantía completa de que la reserva será exitosa 
 entre las consultas y las actualizaciones en nuestro procedimiento. Este tipo de situación se conoce como una "condición de carrera" y es importante
 tenerla en cuenta al diseñar sistemas que manejen operaciones concurrentes en bases de datos.
 
-P4.3
+P4.3: ¿Qué estrategia de programación has utilizado?
 
-P4.4
+Principalmente es procedimental y basada en SQL.
 
-P4.5
+P4.4: ¿Cómo puede verse este hecho en tu código?
+
+P4.5: ¿De qué otro modo crees que podrías resolver el problema propuesto? Incluye el pseudocódigo.
 
 */
 
@@ -172,7 +217,6 @@ end;
 
 exec inicializa_test;
 
--- Completa el test
 
 create or replace procedure test_reserva_evento is
 begin
