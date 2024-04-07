@@ -206,14 +206,26 @@ begin
   end;
   
   --caso 5 El cliente no tiene saldo suficiente
-  begin
-    inicializa_test;
-  end;
-
-  
-end;
+  BEGIN
+        inicializa_test();
+        DBMS_OUTPUT.PUT_LINE('T5');
+        reservar_evento('11111111B', 'concierto_la_moda', DATE '2023-06-27' ); -- NIF del cliente sin saldo
+    EXCEPTION
+        WHEN OTHERS THEN
+            IF SQLCODE = -20004 THEN
+                DBMS_OUTPUT.PUT_LINE('BIEN: Detecta saldo insuficiente correctamente.');
+            ELSE
+                DBMS_OUTPUT.PUT_LINE('MAL: Da error pero no detecta saldo insuficiente.');
+                DBMS_OUTPUT.PUT_LINE('Error en Evento: '||SQLCODE);
+                DBMS_OUTPUT.PUT_LINE('Mensaje '||SQLERRM);
+            END IF;
+    END;
+END;
 /
+
 
 
 set serveroutput on;
 exec test_reserva_evento;
+
+select * from reservas
