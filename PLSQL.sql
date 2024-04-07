@@ -134,6 +134,13 @@ create or replace procedure reservar_evento( arg_NIF_cliente varchar,
      --realización de la reserva (inserción de los argumentos en la tabla reservas)
     insert into reservas (id_reserva, cliente, evento, fecha) VALUES (seq_reservas.nextval, arg_NIF_cliente, vIdevento, arg_fecha); 
 
+    -- Si se ha hecho la reserva, se guardan los cambios
+    if sql%rowcount = 1 then 
+     COMMIT;
+    else
+     ROLLBACK;
+    end if;
+
 end;
 /
 
