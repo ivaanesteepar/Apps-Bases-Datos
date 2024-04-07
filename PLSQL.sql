@@ -119,24 +119,24 @@ create or replace procedure reservar_evento( arg_NIF_cliente varchar,
         
 
     -- Hacemos la reserva:
-    -- Actualizamos el saldo del cliente 
+     -- Actualizamos el saldo del cliente 
     update abonos set saldo = saldo-1 
     where cliente = arg_NIF_cliente;
 
-    -- Actualizamos los asientos disponibles del evento
+     -- Actualizamos los asientos disponibles del evento
     update eventos set asientos_disponibles = asientos_disponibles-1 
     where nombre_evento = arg_nombre_evento;
 
-    -- Consulta para obtener el id del evento y poder realizar la reserva
+     -- Consulta para obtener el id del evento y poder realizar la reserva
     select id_evento into vIdevento
     from eventos
     where nombre_evento = arg_nombre_evento;
 
 
-    -- Realización de la reserva (inserción de los argumentos en la tabla reservas)
+     -- Realización de la reserva (inserción de los argumentos en la tabla reservas)
     insert into reservas (id_reserva, cliente, evento, fecha) VALUES (seq_reservas.nextval, arg_NIF_cliente, vIdevento, arg_fecha); 
 
-    -- Si se ha hecho la reserva, comprobamos que se han guardado los cambios
+     -- Si se ha hecho la reserva, comprobamos que se han guardado los cambios
     if sql%rowcount = 1 then 
       COMMIT;
     else
@@ -185,6 +185,10 @@ Principalmente es procedimental y basada en SQL.
 P4.4: ¿Cómo puede verse este hecho en tu código?
 
 Uso excesivo de procedimientos almacenados, manejo de excepciones, instrucciones SQL integradas, control de transacciones y pruebas automatizadas.
+
+P4.5: ¿De qué otro modo crees que podrías resolver el problema propuesto? Incluye el pseudocódigo.
+
+Uso excesivo de procedimientos almacenados, manejo d excepciones, instrucciones SQL integradas, control de transacciones y pruebas automatizadas.
 
 P4.5: ¿De qué otro modo crees que podrías resolver el problema propuesto? Incluye el pseudocódigo.
 
