@@ -9,7 +9,6 @@ drop sequence seq_reservas;
 
 
 -- Creación de tablas y secuencias
-
 create table clientes(
 	NIF	varchar(9) primary key,
 	nombre	varchar(20) not null,
@@ -109,6 +108,16 @@ create or replace procedure reservar_evento( arg_NIF_cliente varchar,
         RAISE;
   END;
 
+    --Comprobamos que el cliente tiene saldo
+    if vSaldo <= 0 then
+      raise_application_error(-20004, msg_saldo_insuficiente);
+    end if;
+
+    --Comprobamos que el evento no ha pasado    
+    IF trunc(vFecha) < trunc(arg_fecha) THEN
+      RAISE_APPLICATION_ERROR(-20001, msg_evento_pasado);
+    end if;
+        
 
     
 
@@ -210,7 +219,6 @@ end;
 
 exec inicializa_test;
 
--- Completa el test
 
 create or replace procedure test_reserva_evento is
 begin
