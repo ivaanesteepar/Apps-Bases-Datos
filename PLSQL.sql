@@ -85,13 +85,12 @@ create or replace procedure reservar_evento( arg_NIF_cliente varchar,
     select eventos.fecha, eventos.asientos_disponibles into vFecha, vAsientos
     from eventos where eventos.nombre_evento = arg_nombre_evento;
 
-
     select NIF, saldo into vNIF, vSaldo
     from clientes join abonos on (NIF = cliente)
     where NIF = arg_NIF_cliente;
 
 
-    --Comprobamos que el evento existe y el cliente existen
+    --Comprobamos que el evento y cliente existen
     EXCEPTION
       WHEN NO_DATA_FOUND THEN
         ROLLBACK;
@@ -120,25 +119,28 @@ create or replace procedure reservar_evento( arg_NIF_cliente varchar,
         
 
     --Hacemos la reserva:
-     --actualizamos el saldo del cliente 
+    --Actualizamos el saldo del cliente 
     update abonos set saldo = saldo-1 
     where cliente = arg_NIF_cliente;
-     --actualizamos los asientos disponibles del evento
+
+     --Actualizamos los asientos disponibles del evento
     update eventos set asientos_disponibles = asientos_disponibles-1 
     where nombre_evento = arg_nombre_evento;
-     --consulta para obtener el id del evento y poder realizar la reserva
+
+     --Consulta para obtener el id del evento y poder realizar la reserva
     select id_evento into vIdevento
     from eventos
     where nombre_evento = arg_nombre_evento;
-    
-     --realización de la reserva (inserción de los argumentos en la tabla reservas)
+
+
+    --Realización de la reserva (inserción de los argumentos en la tabla reservas)
     insert into reservas (id_reserva, cliente, evento, fecha) VALUES (seq_reservas.nextval, arg_NIF_cliente, vIdevento, arg_fecha); 
 
-    -- Si se ha hecho la reserva, se guardan los cambios
+    -- Si se ha hecho la reserva, comprobamos que se han guardado los cambios
     if sql%rowcount = 1 then 
-     COMMIT;
+      COMMIT;
     else
-     ROLLBACK;
+      ROLLBACK;
     end if;
 
 end;
