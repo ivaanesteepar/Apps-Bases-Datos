@@ -188,15 +188,12 @@ Uso excesivo de procedimientos almacenados, manejo de excepciones, instrucciones
 
 P4.5: ¿De qué otro modo crees que podrías resolver el problema propuesto? Incluye el pseudocódigo.
 
-Uso excesivo de procedimientos almacenados, manejo d excepciones, instrucciones SQL integradas, control de transacciones y pruebas automatizadas.
-
-P4.5: ¿De qué otro modo crees que podrías resolver el problema propuesto? Incluye el pseudocódigo.
-
 Otra forma de resolver el problema podría ser implementar un mecanismo de bloqueo para evitar que varias transacciones intenten reservar el mismo evento simultáneamente. 
 Esto se podría lograr utilizando bloqueos de fila o de tabla durante la operación de reserva. Esto ayuda a evitar problemas de concurrencia al garantizar que las 
 operaciones de comprobación y actualización se realicen de manera segura y consistente.
 El pseudocódigo para esta alternativa podría ser:
 
+	
 -- Inicio de la transacción
 begin
   -- Bloquear la fila correspondiente al evento para evitar que otras transacciones la modifiquen
