@@ -224,7 +224,6 @@ END;
 /
 
 
-
 set serveroutput on;
 exec test_reserva_evento;
 
