@@ -119,8 +119,12 @@ Principalmente es procedimental y basada en SQL.
 
 P4.4: ¿Cómo puede verse este hecho en tu código?
 
+Uso excesivo de procedimientos almacenados, manejo d excepciones, instrucciones SQL integradas, control de transacciones y pruebas automatizadas.
+
 P4.5: ¿De qué otro modo crees que podrías resolver el problema propuesto? Incluye el pseudocódigo.
 
+Utilizando un enfoque más orientado a objetos y separando la lógica de negocio de la interacción con la base de datos, que podemos logralo utilizando
+un lenguaje de programación junto con un ORM para interactuar con la base de datos de manera más abstracta y orientada a objetos.
 */
 
 
