@@ -91,7 +91,7 @@ create or replace procedure reservar_evento( arg_NIF_cliente varchar,
     where NIF = arg_NIF_cliente;
 
 
-    --Comprobamos que el evento existe
+    --Comprobamos que el evento existe y el cliente existen
     EXCEPTION
       WHEN NO_DATA_FOUND THEN
         ROLLBACK;
@@ -119,9 +119,20 @@ create or replace procedure reservar_evento( arg_NIF_cliente varchar,
     end if;
         
 
+    --Hacemos la reserva:
+     --actualizamos el saldo del cliente 
+    update abonos set saldo = saldo-1 
+    where cliente = arg_NIF_cliente;
+     --actualizamos los asientos disponibles del evento
+    update eventos set asientos_disponibles = asientos_disponibles-1 
+    where nombre_evento = arg_nombre_evento;
+     --consulta para obtener el id del evento y poder realizar la reserva
+    select id_evento into vIdevento
+    from eventos
+    where nombre_evento = arg_nombre_evento;
     
-
-
+     --realización de la reserva (inserción de los argumentos en la tabla reservas)
+    insert into reservas (id_reserva, cliente, evento, fecha) VALUES (seq_reservas.nextval, arg_NIF_cliente, vIdevento, arg_fecha); 
 
 end;
 /
