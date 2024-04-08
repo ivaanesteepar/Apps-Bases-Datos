@@ -212,6 +212,13 @@ exec inicializa_test;
 -- Completa el test
 
 create or replace procedure test_reserva_evento is
+
+  filas INTEGER;
+  vIdevento1 eventos.id_evento%TYPE; 
+  vIdevento2 eventos.id_evento%TYPE;
+  vSaldoAnterior abonos.saldo%TYPE;
+  vSaldoActual abonos.saldo&TYPE;
+
 begin
 	 
   --caso 1 Reserva correcta, se realiza
@@ -231,45 +238,69 @@ begin
         
     --Comprobar que se ha hecho la reserva
     IF filas = 0 THEN   
-        DBMS_OUTPUT.PUT_LINE('MAL: No da error pero no hace la reserva correctamente.');
+      DBMS_OUTPUT.PUT_LINE('MAL: No da error pero no hace la reserva correctamente.');
     ELSE 
-        DBMS_OUTPUT.PUT_LINE('BIEN: Reserva correcta.');
+      IF vSaldoActual = vSaldoAnterior - 1 THEN
+        DBMS_OUTPUT.PUT_LINE('BIEN: Reserva correcta y saldo disminuido en 1.');
+      ELSE
+        DBMS_OUTPUT.PUT_LINE('MAL: El saldo no ha disminuido en 1 después de la reserva.');
+      END IF;
     END IF;  
-    EXCEPTION
-      WHEN OTHERS THEN
-        ROLLBACK;
-        DBMS_OUTPUT.PUT_LINE('Error en Evento: ' || SQLCODE || ' - ' || SQLERRM);
-    END;
-    
-  end;
+  EXCEPTION
+    WHEN OTHERS THEN
+      ROLLBACK;
+      DBMS_OUTPUT.PUT_LINE('Error en Evento: ' || SQLCODE || ' - ' || SQLERRM);
+  END;
   
   
   --caso 2 Evento pasado
   begin
-      inicializa_test();
-      DBMS_OUTPUT.PUT_LINE('T2');
-      reservar_evento('12345678A', 'concierto_la_moda', DATE '2024-06-28' );
-    EXCEPTION
-      WHEN OTHERS THEN
-          IF SQLCODE = -20001 THEN
-            DBMS_OUTPUT.PUT_LINE('BIEN: Detecta evento pasado correctamente.');
-          ELSE
-            DBMS_OUTPUT.PUT_LINE('MAL: Da error pero no detecta evento pasado.');
-            DBMS_OUTPUT.PUT_LINE('Error en Evento: '||SQLCODE);
-            DBMS_OUTPUT.PUT_LINE('Mensaje '||SQLERRM);
-          END IF;
-    END;
-  end;
+    inicializa_test();
+    DBMS_OUTPUT.PUT_LINE('T2');
+    reservar_evento('12345678A', 'concierto_la_moda', DATE '2024-06-28' ); -- Cambiado fecha futura
+  EXCEPTION
+    WHEN OTHERS THEN
+      IF SQLCODE = -20001 THEN
+        DBMS_OUTPUT.PUT_LINE('BIEN: Detecta evento pasado correctamente.');
+      ELSE
+        DBMS_OUTPUT.PUT_LINE('MAL: Da error pero no detecta evento pasado.');
+        DBMS_OUTPUT.PUT_LINE('Error en Evento: '||SQLCODE);
+        DBMS_OUTPUT.PUT_LINE('Mensaje '||SQLERRM);
+      END IF;
+  END;
+
   
   --caso 3 Evento inexistente
   begin
-    inicializa_test;
+    inicializa_test();
+    DBMS_OUTPUT.PUT_LINE('T3');
+    reservar_evento('12345678A', 'evento_inexistente', DATE '2023-06-27' ); -- Cambiado ID de evento inexistente
+  EXCEPTION
+    WHEN OTHERS THEN
+      IF SQLCODE = -20003 THEN
+        DBMS_OUTPUT.PUT_LINE('BIEN: Detecta evento inexistente correctamente.');
+      ELSE
+        DBMS_OUTPUT.PUT_LINE('MAL: Da error pero no detecta evento inexistente.');
+        DBMS_OUTPUT.PUT_LINE('Error en Evento: '||SQLCODE);
+        DBMS_OUTPUT.PUT_LINE('Mensaje '||SQLERRM);
+      END IF;
   end;
   
 
   --caso 4 Cliente inexistente  
   begin
-    inicializa_test;
+    inicializa_test();
+      DBMS_OUTPUT.PUT_LINE('T4');
+      reservar_evento('12345678X', 'concierto_la_moda', DATE '2023-06-27' ); -- Cambiado NIF inexistente
+  EXCEPTION
+    WHEN OTHERS THEN
+      IF SQLCODE = -20002 THEN
+        DBMS_OUTPUT.PUT_LINE('BIEN: Detecta cliente inexistente correctamente.');
+      ELSE
+        DBMS_OUTPUT.PUT_LINE('MAL: Da error pero no detecta cliente inexistente.');
+        DBMS_OUTPUT.PUT_LINE('Error en Evento: '||SQLCODE);
+        DBMS_OUTPUT.PUT_LINE('Mensaje '||SQLERRM);
+      END IF;
   end;
   
   --caso 5 El cliente no tiene saldo suficiente
