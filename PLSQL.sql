@@ -359,7 +359,7 @@ begin
         inicializa_test();
         DBMS_OUTPUT.PUT_LINE('T5');
         reservar_evento('11111111B', 'concierto_la_moda', DATE '2023-06-27' ); -- NIF del cliente sin saldo
-    EXCEPTION
+  EXCEPTION
         WHEN OTHERS THEN
             IF SQLCODE = -20004 THEN
                 DBMS_OUTPUT.PUT_LINE('BIEN: Detecta saldo insuficiente correctamente.');
@@ -368,7 +368,7 @@ begin
                 DBMS_OUTPUT.PUT_LINE('Error en Evento: '||SQLCODE);
                 DBMS_OUTPUT.PUT_LINE('Mensaje '||SQLERRM);
             END IF;
-    END;
+  END;
 END;
 /
 
