@@ -30,7 +30,7 @@ create sequence seq_eventos;
 create table eventos(
 	id_evento	integer  primary key,
 	nombre_evento		varchar(20),
-    fecha       date not null,
+  fecha       date not null,
 	asientos_disponibles	integer  not null
 );
 
@@ -39,7 +39,7 @@ create sequence seq_reservas;
 create table reservas(
 	id_reserva	integer primary key,
 	cliente  	varchar(9) references clientes,
-    evento      integer references eventos,
+  evento      integer references eventos,
 	abono       integer references abonos,
 	fecha	date not null
 );
@@ -131,7 +131,6 @@ create or replace procedure reservar_evento( arg_NIF_cliente varchar,
     select id_evento into vIdevento
     from eventos
     where nombre_evento = arg_nombre_evento;
-
 
      -- Realización de la reserva (inserción de los argumentos en la tabla reservas)
     insert into reservas (id_reserva, cliente, evento, fecha) VALUES (seq_reservas.nextval, arg_NIF_cliente, vIdevento, arg_fecha); 
@@ -340,9 +339,9 @@ begin
 
   --caso 4 Cliente inexistente  
   begin
-      inicializa_test();
-      DBMS_OUTPUT.PUT_LINE('T4');
-      reservar_evento('12345678X', 'concierto_la_moda', DATE '2023-06-27' ); -- Cambiado NIF inexistente
+    inicializa_test();
+    DBMS_OUTPUT.PUT_LINE('T4');
+    reservar_evento('12345678X', 'concierto_la_moda', DATE '2023-06-27' ); -- Cambiado NIF inexistente
   EXCEPTION
     WHEN OTHERS THEN
       IF SQLCODE = -20002 THEN
@@ -354,6 +353,7 @@ begin
       END IF;
   end;
   
+
   --caso 5 El cliente no tiene saldo suficiente
   BEGIN
     inicializa_test();
@@ -371,7 +371,6 @@ begin
   END;
 END;
 /
-
 
 
 set serveroutput on;
