@@ -273,10 +273,8 @@ begin
 	 
   --caso 1 Reserva correcta, se realiza
   begin
-    inicializa_test();
-        
-    DBMS_OUTPUT.PUT_LINE('T1');
-        
+    inicializa_test();  
+    DBMS_OUTPUT.PUT_LINE('T1'); 
     reservar_evento('12345678A', 'teatro_impro', DATE '2023-07-1');
         
     SELECT COUNT(*) INTO filas
