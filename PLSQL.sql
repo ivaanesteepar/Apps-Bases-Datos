@@ -340,7 +340,7 @@ begin
 
   --caso 4 Cliente inexistente  
   begin
-    inicializa_test();
+      inicializa_test();
       DBMS_OUTPUT.PUT_LINE('T4');
       reservar_evento('12345678X', 'concierto_la_moda', DATE '2023-06-27' ); -- Cambiado NIF inexistente
   EXCEPTION
