@@ -179,11 +179,20 @@ tenerla en cuenta al diseñar sistemas que manejen operaciones concurrentes en b
 
 P4.3: ¿Qué estrategia de programación has utilizado?
 
-Principalmente es procedimental y basada en SQL.
+Utiliza una estrategia defensiva para realizar operaciones en la base de datos de manera segura.
 
 P4.4: ¿Cómo puede verse este hecho en tu código?
 
-Uso excesivo de procedimientos almacenados, manejo de excepciones, instrucciones SQL integradas, control de transacciones y pruebas automatizadas.
+-Implementando un manejo robusto de excepciones. Se declaran excepciones personalizadas como EVENTO_PASADO, CLIENTE_INEXISTENTE, EVENTO_INEXISTENTE, 
+y SALDO_INSUFICIENTE para manejar situaciones específicas.
+
+-Realizando pruebas para asegurar el comportamiento esperado del procedimiento reservar_evento. Se implementa el procedimiento test_reserva_evento, 
+que realiza pruebas automatizadas para diferentes casos, como reservas exitosas, eventos pasados, eventos inexistentes... Este procedimiento ejecuta 
+el procedimiento reservar_evento con diferentes parámetros y verifica si el comportamiento es el esperado utilizando DBMS_OUTPUT.PUT_LINE para mostrar 
+mensajes de estado.
+
+-Usando transacciones controladas. Las operaciones de reserva se realizan dentro de transacciones controladas con COMMIT y ROLLBACK, 
+garantizando la integridad de los datos y la reversibilidad de las acciones en caso de error.
 
 P4.5: ¿De qué otro modo crees que podrías resolver el problema propuesto? Incluye el pseudocódigo.
 
