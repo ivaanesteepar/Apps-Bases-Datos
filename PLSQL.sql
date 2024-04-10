@@ -148,17 +148,9 @@ end;
 ------ Deja aquí tus respuestas a las preguntas del enunciado:
 /* P4.1: El resultado de la comprobación del paso 2 ¿sigue siendo fiable en el paso 3?
 
-En el procedimiento 'test_reserva_evento', el paso 2 verifica si el sistema detecta correctamente un evento pasado cuando
-se intenta hacer una reserva. En este caso, se reserva un evento con una fecha posterior a la fecha actual (DATE '2024-06-28'),
-y se espera que el sistema genere un error indicando que el evento ya ha pasado. El manejo de esta situación se encuentra dentro
-del bloque EXCEPTION correspondiente, donde se espera que se produzca un error con el código -20001, que indica que el evento ha pasado.
-
-En el paso 3, se verifica si el sistema detecta correctamente un evento inexistente cuando se intenta hacer una reserva. Para este caso,
-se intenta reservar un evento que no existe, y se espera que el sistema genere un error con el código -20003, que indica que el evento no existe.
-
-Ambas pruebas son independientes entre sí, ya que están diseñadas para verificar diferentes aspectos del procedimiento reservar_evento.
-Por lo tanto, el resultado de la comprobación en el paso 2 no afecta la fiabilidad de la comprobación en el paso 3, y viceversa. Cada paso
-evalúa una condición específica y el comportamiento esperado del sistema frente a esa condición.
+No, el resultado de la comprobación del paso 2 ya no es fiable en el paso 3. Esto se debe a que entre la ejecución de la comprobación 
+y la operación real de reserva, pueden ocurrir cambios en los datos que invaliden las comprobaciones previas. Por ejemplo, otro proceso 
+podría reservar el último asiento disponible justo antes de que se realice la reserva actual.
 	
 P4.2:En el paso 3, la ejecución concurrente del mismo procedimiento reservar_evento con, quizás otros o los mimos argumentos,
 ¿podría habernos añadido una reserva no recogida en esa SELECT que fuese incompatible con nuestra reserva?, ¿por qué?
@@ -179,7 +171,10 @@ tenerla en cuenta al diseñar sistemas que manejen operaciones concurrentes en b
 
 P4.3: ¿Qué estrategia de programación has utilizado?
 
-Utiliza una estrategia defensiva para realizar operaciones en la base de datos de manera segura.
+Utiliza una estrategia defensiva para realizar operaciones en la base de datos de manera segura. Esta estrategia implica utilizar consultas SELECT 
+para verificar si se cumplen todas las condiciones necesarias antes de realizar una transacción. Si todas las condiciones se cumplen, se llevan 
+a cabo las operaciones de actualización seguidas de un commit. Sin embargo, si alguna condición no se cumple, se realiza un rollback y se lanza 
+una excepción detallando el problema específico.
 
 P4.4: ¿Cómo puede verse este hecho en tu código?
 
