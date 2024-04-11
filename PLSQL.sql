@@ -117,16 +117,7 @@ create or replace procedure reservar_evento( arg_NIF_cliente varchar,
       RAISE_APPLICATION_ERROR(-20001, msg_evento_pasado);
     end if;
         
-
     -- Hacemos la reserva:
-     -- Actualizamos el saldo del cliente 
-    update abonos set saldo = saldo-1 
-    where cliente = arg_NIF_cliente;
-
-     -- Actualizamos los asientos disponibles del evento
-    update eventos set asientos_disponibles = asientos_disponibles-1 
-    where nombre_evento = arg_nombre_evento;
-
      -- Consulta para obtener el id del evento y poder realizar la reserva
     select id_evento into vIdevento
     from eventos
@@ -134,6 +125,10 @@ create or replace procedure reservar_evento( arg_NIF_cliente varchar,
 
      -- Realización de la reserva (inserción de los argumentos en la tabla reservas)
     insert into reservas (id_reserva, cliente, evento, fecha) VALUES (seq_reservas.nextval, arg_NIF_cliente, vIdevento, arg_fecha); 
+
+    -- Actualizamos el estado
+    update abonos set saldo = saldo - 1 where cliente = arg_NIF_cliente;
+    update eventos set asientos_disponibles = asientos_disponibles - 1 where nombre_evento = arg_nombre_evento;
 
      -- Si se ha hecho la reserva, comprobamos que se han guardado los cambios
     if sql%rowcount = 1 then 
@@ -274,7 +269,7 @@ create or replace procedure test_reserva_evento is
   vIdevento1 eventos.id_evento%TYPE; 
   vIdevento2 eventos.id_evento%TYPE;
   vSaldoAnterior abonos.saldo%TYPE;
-  vSaldoActual abonos.saldo&TYPE;
+  vSaldoActual abonos.saldo%TYPE;
 
 begin
 	 
@@ -282,16 +277,24 @@ begin
   begin
     inicializa_test();  
     DBMS_OUTPUT.PUT_LINE('T1'); 
-    reservar_evento('12345678A', 'teatro_impro', DATE '2023-07-1');
-        
+
+    -- Guardar el saldo antes de hacer la reserva
+    SELECT saldo INTO vSaldoAnterior FROM abonos WHERE cliente = '12345678A';
+    
+    reservar_evento('12345678A', 'teatro_impro', DATE '2024-07-1');
+    
+    -- Se cuenta el número de filas que hay en la tabla reservas
     SELECT COUNT(*) INTO filas
     FROM reservas JOIN eventos ON (id_evento = evento)
     WHERE nombre_evento = 'teatro_impro'
-    AND eventos.fecha = DATE '2023-07-1' AND reservas.cliente = '12345678A';
-       
+    AND eventos.fecha = DATE '2024-07-1' AND reservas.cliente = '12345678A';
+    
+    -- Verificar la disminución del saldo
+    SELECT saldo INTO vSaldoActual FROM abonos WHERE cliente = '12345678A';
+ 
     COMMIT;
         
-    --Comprobar que se ha hecho la reserva
+    -- Comprobar que se ha hecho la reserva
     IF filas = 0 THEN   
       DBMS_OUTPUT.PUT_LINE('MAL: No da error pero no hace la reserva correctamente.');
     ELSE 
@@ -313,7 +316,8 @@ begin
     inicializa_test();
     DBMS_OUTPUT.PUT_LINE('T2');
     reservar_evento('12345678A', 'concierto_la_moda', DATE '2024-06-28' ); -- Cambiado fecha futura
-  EXCEPTION
+ 
+ EXCEPTION
     WHEN OTHERS THEN
       IF SQLCODE = -20001 THEN
         DBMS_OUTPUT.PUT_LINE('BIEN: Detecta evento pasado correctamente.');
@@ -329,7 +333,8 @@ begin
   begin
     inicializa_test();
     DBMS_OUTPUT.PUT_LINE('T3');
-    reservar_evento('12345678A', 'evento_inexistente', DATE '2023-06-27' ); -- Cambiado ID de evento inexistente
+    reservar_evento('12345678A', 'evento_inexistente', DATE '2024-06-27' ); -- Cambiado ID de evento inexistente
+    
   EXCEPTION
     WHEN OTHERS THEN
       IF SQLCODE = -20003 THEN
@@ -346,7 +351,8 @@ begin
   begin
     inicializa_test();
     DBMS_OUTPUT.PUT_LINE('T4');
-    reservar_evento('12345678X', 'concierto_la_moda', DATE '2023-06-27' ); -- Cambiado NIF inexistente
+    reservar_evento('12345678X', 'concierto_la_moda', DATE '2024-06-27' ); -- Cambiado NIF inexistente
+
   EXCEPTION
     WHEN OTHERS THEN
       IF SQLCODE = -20002 THEN
@@ -363,7 +369,8 @@ begin
   BEGIN
     inicializa_test();
     DBMS_OUTPUT.PUT_LINE('T5');
-    reservar_evento('11111111B', 'concierto_la_moda', DATE '2023-06-27' ); -- NIF del cliente sin saldo
+    reservar_evento('11111111B', 'concierto_la_moda', DATE '2024-06-27' ); -- NIF del cliente sin saldo
+
   EXCEPTION
     WHEN OTHERS THEN
       IF SQLCODE = -20004 THEN
