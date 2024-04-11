@@ -152,6 +152,7 @@ No, el resultado de la comprobación del paso 2 ya no es fiable en el paso 3. Es
 y la operación real de reserva, pueden ocurrir cambios en los datos que invaliden las comprobaciones previas. Por ejemplo, otro proceso 
 podría reservar el último asiento disponible justo antes de que se realice la reserva actual.
 	
+
 P4.2:En el paso 3, la ejecución concurrente del mismo procedimiento reservar_evento con, quizás otros o los mimos argumentos,
 ¿podría habernos añadido una reserva no recogida en esa SELECT que fuese incompatible con nuestra reserva?, ¿por qué?
 
@@ -169,12 +170,14 @@ hacer la reserva, no hay una garantía completa de que la reserva será exitosa 
 entre las consultas y las actualizaciones en nuestro procedimiento. Este tipo de situación se conoce como una "condición de carrera" y es importante
 tenerla en cuenta al diseñar sistemas que manejen operaciones concurrentes en bases de datos.
 
+
 P4.3: ¿Qué estrategia de programación has utilizado?
 
 Utiliza una estrategia defensiva para realizar operaciones en la base de datos de manera segura. Esta estrategia implica utilizar consultas SELECT 
 para verificar si se cumplen todas las condiciones necesarias antes de realizar una transacción. Si todas las condiciones se cumplen, se llevan 
 a cabo las operaciones de actualización seguidas de un commit. Sin embargo, si alguna condición no se cumple, se realiza un rollback y se lanza 
 una excepción detallando el problema específico.
+
 
 P4.4: ¿Cómo puede verse este hecho en tu código?
 
@@ -189,6 +192,7 @@ mensajes de estado.
 -Usando transacciones controladas. Las operaciones de reserva se realizan dentro de transacciones controladas con COMMIT y ROLLBACK, 
 garantizando la integridad de los datos y la reversibilidad de las acciones en caso de error.
 
+
 P4.5: ¿De qué otro modo crees que podrías resolver el problema propuesto? Incluye el pseudocódigo.
 
 Otra forma de resolver el problema podría ser implementar un mecanismo de bloqueo para evitar que varias transacciones intenten reservar el mismo evento simultáneamente. 
@@ -196,7 +200,6 @@ Esto se podría lograr utilizando bloqueos de fila o de tabla durante la operaci
 operaciones de comprobación y actualización se realicen de manera segura y consistente.
 El pseudocódigo para esta alternativa podría ser:
 
-	
 -- Inicio de la transacción
 begin
   -- Bloquear la fila correspondiente al evento para evitar que otras transacciones la modifiquen
