@@ -133,7 +133,6 @@ create or replace procedure reservar_evento( arg_NIF_cliente varchar,
      -- Si se ha hecho la reserva, comprobamos que se han guardado los cambios
     if sql%rowcount = 1 then 
       COMMIT;
-      dbms_output.put_line('Reserva confirmada mediante commit');
     else
       ROLLBACK;
     end if;
@@ -281,8 +280,7 @@ begin
 
     -- Guardar el saldo antes de hacer la reserva
     SELECT saldo INTO vSaldoAnterior FROM abonos WHERE cliente = '12345678A';
-    DBMS_OUTPUT.PUT_LINE('Saldo antes reserva: ' || vSaldoAnterior);
-
+    
     reservar_evento('12345678A', 'teatro_impro', DATE '2024-07-1');
     
     -- Se cuenta el número de filas que hay en la tabla reservas
@@ -293,11 +291,10 @@ begin
     
     -- Verificar la disminución del saldo
     SELECT saldo INTO vSaldoActual FROM abonos WHERE cliente = '12345678A';
-    DBMS_OUTPUT.PUT_LINE('Saldo despues reserva: ' || vSaldoActual);
-
+ 
     COMMIT;
         
-    --Comprobar que se ha hecho la reserva
+    -- Comprobar que se ha hecho la reserva
     IF filas = 0 THEN   
       DBMS_OUTPUT.PUT_LINE('MAL: No da error pero no hace la reserva correctamente.');
     ELSE 
@@ -319,7 +316,8 @@ begin
     inicializa_test();
     DBMS_OUTPUT.PUT_LINE('T2');
     reservar_evento('12345678A', 'concierto_la_moda', DATE '2024-06-28' ); -- Cambiado fecha futura
-  EXCEPTION
+ 
+ EXCEPTION
     WHEN OTHERS THEN
       IF SQLCODE = -20001 THEN
         DBMS_OUTPUT.PUT_LINE('BIEN: Detecta evento pasado correctamente.');
@@ -336,6 +334,7 @@ begin
     inicializa_test();
     DBMS_OUTPUT.PUT_LINE('T3');
     reservar_evento('12345678A', 'evento_inexistente', DATE '2024-06-27' ); -- Cambiado ID de evento inexistente
+    
   EXCEPTION
     WHEN OTHERS THEN
       IF SQLCODE = -20003 THEN
@@ -353,6 +352,7 @@ begin
     inicializa_test();
     DBMS_OUTPUT.PUT_LINE('T4');
     reservar_evento('12345678X', 'concierto_la_moda', DATE '2024-06-27' ); -- Cambiado NIF inexistente
+
   EXCEPTION
     WHEN OTHERS THEN
       IF SQLCODE = -20002 THEN
@@ -370,6 +370,7 @@ begin
     inicializa_test();
     DBMS_OUTPUT.PUT_LINE('T5');
     reservar_evento('11111111B', 'concierto_la_moda', DATE '2024-06-27' ); -- NIF del cliente sin saldo
+
   EXCEPTION
     WHEN OTHERS THEN
       IF SQLCODE = -20004 THEN
