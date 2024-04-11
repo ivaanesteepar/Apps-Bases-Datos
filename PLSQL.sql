@@ -30,7 +30,7 @@ create sequence seq_eventos;
 create table eventos(
 	id_evento	integer  primary key,
 	nombre_evento		varchar(20),
-    fecha       date not null,
+  fecha       date not null,
 	asientos_disponibles	integer  not null
 );
 
@@ -39,7 +39,7 @@ create sequence seq_reservas;
 create table reservas(
 	id_reserva	integer primary key,
 	cliente  	varchar(9) references clientes,
-    evento      integer references eventos,
+  evento      integer references eventos,
 	abono       integer references abonos,
 	fecha	date not null
 );
@@ -117,28 +117,23 @@ create or replace procedure reservar_evento( arg_NIF_cliente varchar,
       RAISE_APPLICATION_ERROR(-20001, msg_evento_pasado);
     end if;
         
-
     -- Hacemos la reserva:
-     -- Actualizamos el saldo del cliente 
-    update abonos set saldo = saldo-1 
-    where cliente = arg_NIF_cliente;
-
-     -- Actualizamos los asientos disponibles del evento
-    update eventos set asientos_disponibles = asientos_disponibles-1 
-    where nombre_evento = arg_nombre_evento;
-
      -- Consulta para obtener el id del evento y poder realizar la reserva
     select id_evento into vIdevento
     from eventos
     where nombre_evento = arg_nombre_evento;
 
-
      -- Realización de la reserva (inserción de los argumentos en la tabla reservas)
     insert into reservas (id_reserva, cliente, evento, fecha) VALUES (seq_reservas.nextval, arg_NIF_cliente, vIdevento, arg_fecha); 
+
+    -- Actualizamos el estado
+    update abonos set saldo = saldo - 1 where cliente = arg_NIF_cliente;
+    update eventos set asientos_disponibles = asientos_disponibles - 1 where nombre_evento = arg_nombre_evento;
 
      -- Si se ha hecho la reserva, comprobamos que se han guardado los cambios
     if sql%rowcount = 1 then 
       COMMIT;
+      dbms_output.put_line('Reserva confirmada mediante commit');
     else
       ROLLBACK;
     end if;
@@ -153,6 +148,7 @@ No, el resultado de la comprobación del paso 2 ya no es fiable en el paso 3. Es
 y la operación real de reserva, pueden ocurrir cambios en los datos que invaliden las comprobaciones previas. Por ejemplo, otro proceso 
 podría reservar el último asiento disponible justo antes de que se realice la reserva actual.
 	
+
 P4.2:En el paso 3, la ejecución concurrente del mismo procedimiento reservar_evento con, quizás otros o los mimos argumentos,
 ¿podría habernos añadido una reserva no recogida en esa SELECT que fuese incompatible con nuestra reserva?, ¿por qué?
 
@@ -170,12 +166,14 @@ hacer la reserva, no hay una garantía completa de que la reserva será exitosa 
 entre las consultas y las actualizaciones en nuestro procedimiento. Este tipo de situación se conoce como una "condición de carrera" y es importante
 tenerla en cuenta al diseñar sistemas que manejen operaciones concurrentes en bases de datos.
 
+
 P4.3: ¿Qué estrategia de programación has utilizado?
 
 Utiliza una estrategia defensiva para realizar operaciones en la base de datos de manera segura. Esta estrategia implica utilizar consultas SELECT 
 para verificar si se cumplen todas las condiciones necesarias antes de realizar una transacción. Si todas las condiciones se cumplen, se llevan 
 a cabo las operaciones de actualización seguidas de un commit. Sin embargo, si alguna condición no se cumple, se realiza un rollback y se lanza 
 una excepción detallando el problema específico.
+
 
 P4.4: ¿Cómo puede verse este hecho en tu código?
 
@@ -190,9 +188,6 @@ mensajes de estado.
 -Usando transacciones controladas. Las operaciones de reserva se realizan dentro de transacciones controladas con COMMIT y ROLLBACK, 
 garantizando la integridad de los datos y la reversibilidad de las acciones en caso de error.
 
-P4.5: ¿De qué otro modo crees que podrías resolver el problema propuesto? Incluye el pseudocódigo.
-
-Uso excesivo de procedimientos almacenados, manejo d excepciones, instrucciones SQL integradas, control de transacciones y pruebas automatizadas.
 
 P4.5: ¿De qué otro modo crees que podrías resolver el problema propuesto? Incluye el pseudocódigo.
 
@@ -270,73 +265,122 @@ exec inicializa_test;
 
 
 create or replace procedure test_reserva_evento is
+
+  filas INTEGER;
+  vIdevento1 eventos.id_evento%TYPE; 
+  vIdevento2 eventos.id_evento%TYPE;
+  vSaldoAnterior abonos.saldo%TYPE;
+  vSaldoActual abonos.saldo%TYPE;
+
 begin
 	 
   --caso 1 Reserva correcta, se realiza
   begin
-    inicializa_test();
-        
-    DBMS_OUTPUT.PUT_LINE('T1');
-        
-    reservar_evento('12345678A', 'teatro_impro', DATE '2023-07-1');
-        
+    inicializa_test();  
+    DBMS_OUTPUT.PUT_LINE('T1'); 
+
+    -- Guardar el saldo antes de hacer la reserva
+    SELECT saldo INTO vSaldoAnterior FROM abonos WHERE cliente = '12345678A';
+    DBMS_OUTPUT.PUT_LINE('Saldo antes reserva: ' || vSaldoAnterior);
+
+    reservar_evento('12345678A', 'teatro_impro', DATE '2024-07-1');
+    
+    -- Se cuenta el número de filas que hay en la tabla reservas
     SELECT COUNT(*) INTO filas
     FROM reservas JOIN eventos ON (id_evento = evento)
     WHERE nombre_evento = 'teatro_impro'
-    AND eventos.fecha = DATE '2023-07-1' AND reservas.cliente = '12345678A';
-       
+    AND eventos.fecha = DATE '2024-07-1' AND reservas.cliente = '12345678A';
+    
+    -- Verificar la disminución del saldo
+    SELECT saldo INTO vSaldoActual FROM abonos WHERE cliente = '12345678A';
+    DBMS_OUTPUT.PUT_LINE('Saldo despues reserva: ' || vSaldoActual);
+
     COMMIT;
         
     --Comprobar que se ha hecho la reserva
     IF filas = 0 THEN   
-        DBMS_OUTPUT.PUT_LINE('MAL: No da error pero no hace la reserva correctamente.');
+      DBMS_OUTPUT.PUT_LINE('MAL: No da error pero no hace la reserva correctamente.');
     ELSE 
-        DBMS_OUTPUT.PUT_LINE('BIEN: Reserva correcta.');
+      IF vSaldoActual = vSaldoAnterior - 1 THEN
+        DBMS_OUTPUT.PUT_LINE('BIEN: Reserva correcta y saldo disminuido en 1.');
+      ELSE
+        DBMS_OUTPUT.PUT_LINE('MAL: El saldo no ha disminuido en 1 después de la reserva.');
+      END IF;
     END IF;  
-    EXCEPTION
-      WHEN OTHERS THEN
-        ROLLBACK;
-        DBMS_OUTPUT.PUT_LINE('Error en Evento: ' || SQLCODE || ' - ' || SQLERRM);
-    END;
-    
-  end;
+  EXCEPTION
+    WHEN OTHERS THEN
+      ROLLBACK;
+      DBMS_OUTPUT.PUT_LINE('Error en Evento: ' || SQLCODE || ' - ' || SQLERRM);
+  END;
   
   
   --caso 2 Evento pasado
   begin
-      inicializa_test();
-      DBMS_OUTPUT.PUT_LINE('T2');
-      reservar_evento('12345678A', 'concierto_la_moda', DATE '2024-06-28' );
-    EXCEPTION
-      WHEN OTHERS THEN
-          IF SQLCODE = -20001 THEN
-            DBMS_OUTPUT.PUT_LINE('BIEN: Detecta evento pasado correctamente.');
-          ELSE
-            DBMS_OUTPUT.PUT_LINE('MAL: Da error pero no detecta evento pasado.');
-            DBMS_OUTPUT.PUT_LINE('Error en Evento: '||SQLCODE);
-            DBMS_OUTPUT.PUT_LINE('Mensaje '||SQLERRM);
-          END IF;
-    END;
-  end;
+    inicializa_test();
+    DBMS_OUTPUT.PUT_LINE('T2');
+    reservar_evento('12345678A', 'concierto_la_moda', DATE '2024-06-28' ); -- Cambiado fecha futura
+  EXCEPTION
+    WHEN OTHERS THEN
+      IF SQLCODE = -20001 THEN
+        DBMS_OUTPUT.PUT_LINE('BIEN: Detecta evento pasado correctamente.');
+      ELSE
+        DBMS_OUTPUT.PUT_LINE('MAL: Da error pero no detecta evento pasado.');
+        DBMS_OUTPUT.PUT_LINE('Error en Evento: '||SQLCODE);
+        DBMS_OUTPUT.PUT_LINE('Mensaje '||SQLERRM);
+      END IF;
+  END;
+
   
   --caso 3 Evento inexistente
   begin
-    inicializa_test;
+    inicializa_test();
+    DBMS_OUTPUT.PUT_LINE('T3');
+    reservar_evento('12345678A', 'evento_inexistente', DATE '2024-06-27' ); -- Cambiado ID de evento inexistente
+  EXCEPTION
+    WHEN OTHERS THEN
+      IF SQLCODE = -20003 THEN
+        DBMS_OUTPUT.PUT_LINE('BIEN: Detecta evento inexistente correctamente.');
+      ELSE
+        DBMS_OUTPUT.PUT_LINE('MAL: Da error pero no detecta evento inexistente.');
+        DBMS_OUTPUT.PUT_LINE('Error en Evento: '||SQLCODE);
+        DBMS_OUTPUT.PUT_LINE('Mensaje '||SQLERRM);
+      END IF;
   end;
   
 
   --caso 4 Cliente inexistente  
   begin
-    inicializa_test;
+    inicializa_test();
+    DBMS_OUTPUT.PUT_LINE('T4');
+    reservar_evento('12345678X', 'concierto_la_moda', DATE '2024-06-27' ); -- Cambiado NIF inexistente
+  EXCEPTION
+    WHEN OTHERS THEN
+      IF SQLCODE = -20002 THEN
+        DBMS_OUTPUT.PUT_LINE('BIEN: Detecta cliente inexistente correctamente.');
+      ELSE
+        DBMS_OUTPUT.PUT_LINE('MAL: Da error pero no detecta cliente inexistente.');
+        DBMS_OUTPUT.PUT_LINE('Error en Evento: '||SQLCODE);
+        DBMS_OUTPUT.PUT_LINE('Mensaje '||SQLERRM);
+      END IF;
   end;
   
-  --caso 5 El cliente no tiene saldo suficiente
-  begin
-    inicializa_test;
-  end;
 
-  
-end;
+  --caso 5 El cliente no tiene saldo suficiente
+  BEGIN
+    inicializa_test();
+    DBMS_OUTPUT.PUT_LINE('T5');
+    reservar_evento('11111111B', 'concierto_la_moda', DATE '2024-06-27' ); -- NIF del cliente sin saldo
+  EXCEPTION
+    WHEN OTHERS THEN
+      IF SQLCODE = -20004 THEN
+        DBMS_OUTPUT.PUT_LINE('BIEN: Detecta saldo insuficiente correctamente.');
+      ELSE
+        DBMS_OUTPUT.PUT_LINE('MAL: Da error pero no detecta saldo insuficiente.');
+        DBMS_OUTPUT.PUT_LINE('Error en Evento: '||SQLCODE);
+        DBMS_OUTPUT.PUT_LINE('Mensaje '||SQLERRM);
+      END IF;
+  END;
+END;
 /
 
 
