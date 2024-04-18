@@ -52,8 +52,8 @@ public class ServicioImpl implements Servicio {
 	        con.setAutoCommit(false);
 
 
-			// FORMATEAR FECHA
-			// Crear un objeto SimpleDateFormat con el formato de fecha
+		// FORMATEAR FECHA
+		// Crear un objeto SimpleDateFormat con el formato de fecha
 	        SimpleDateFormat sdf2 = new SimpleDateFormat("dd/MM/yyyy");
 
 	        // Formatear la fecha a String con el formato deseado
@@ -72,8 +72,8 @@ public class ServicioImpl implements Servicio {
 	        String fechaFormateada = sdf3.format(fechaSqlDate);
 
 
-			//FORMATEAR HORA
-			// Conversion a horas
+		//FORMATEAR HORA
+		// Conversion a horas
 	        int hours = horaTimestamp.getHours();
 	        int minutes = horaTimestamp.getMinutes();
 
