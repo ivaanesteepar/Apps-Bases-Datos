@@ -62,7 +62,7 @@ public class ServicioImpl implements Servicio {
 	        st.setDate(4, fechaSqlDate);
 	        rs = st.executeQuery();
 
-	        if (!rs.next() || rs.getInt("nPlazasLibres") < nroPlazas) {
+	        if (!rs.next()) {
 	            throw new CompraBilleteTrenException(CompraBilleteTrenException.NO_PLAZAS);
 	        }
 
