@@ -82,8 +82,8 @@ public class ServicioImpl implements Servicio {
 	        /// Define el formato deseado para la hora
 	        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm");
 
-		    // Formatea la hora local
-		    String horaFormateada = horaLocalTime.format(formatter);
+		// Formatea la hora local
+		String horaFormateada = horaLocalTime.format(formatter);
 
 
 
@@ -98,7 +98,7 @@ public class ServicioImpl implements Servicio {
 	        st.setDate(4, fechaSqlDate);
 	        rs = st.executeQuery();
 
-			System.out.println("origen: " + origen + " \n" + "destino: " + destino + " \n" + "hora: " + horaFormateada + " \n" + "fechaDate: " + fechaSqlDate + "\n"+"fechaString: " + fechaFormateada + "\n");
+		System.out.println("origen: " + origen + " \n" + "destino: " + destino + " \n" + "hora: " + horaFormateada + " \n" + "fechaDate: " + fechaSqlDate + "\n"+"fechaString: " + fechaFormateada + "\n");
 
 	        if (nPlazasLibres < nroPlazas) {
 	            throw new CompraBilleteTrenException(CompraBilleteTrenException.NO_PLAZAS);
