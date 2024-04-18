@@ -99,6 +99,7 @@ public class ServicioImpl implements Servicio {
 	        rs = st.executeQuery();
 
 		System.out.println("origen: " + origen + " \n" + "destino: " + destino + " \n" + "hora: " + horaFormateada + " \n" + "fechaDate: " + fechaSqlDate + "\n"+"fechaString: " + fechaFormateada + "\n");
+		
 		if (!rs.next()) {
 	            throw new CompraBilleteTrenException(CompraBilleteTrenException.NO_EXISTE_VIAJE);
 	        }
