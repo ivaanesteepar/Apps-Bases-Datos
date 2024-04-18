@@ -99,13 +99,16 @@ public class ServicioImpl implements Servicio {
 	        rs = st.executeQuery();
 
 		System.out.println("origen: " + origen + " \n" + "destino: " + destino + " \n" + "hora: " + horaFormateada + " \n" + "fechaDate: " + fechaSqlDate + "\n"+"fechaString: " + fechaFormateada + "\n");
-
-	        if (nPlazasLibres < nroPlazas) {
-	            throw new CompraBilleteTrenException(CompraBilleteTrenException.NO_PLAZAS);
+		if (!rs.next()) {
+	            throw new CompraBilleteTrenException(CompraBilleteTrenException.NO_EXISTE_VIAJE);
 	        }
 
 	        int idViaje = rs.getInt("idViaje");
 	        int nPlazasLibres = rs.getInt("nPlazasLibres");
+
+		if (nPlazasLibres < nroPlazas) {
+	            throw new CompraBilleteTrenException(CompraBilleteTrenException.NO_PLAZAS);
+	        }
 
 	        // Insertar fila en la tabla de tickets
 	        query = "INSERT INTO tickets (idViaje, fechaCompra, cantidad, precio) VALUES (?, ?, ?, ?)";
