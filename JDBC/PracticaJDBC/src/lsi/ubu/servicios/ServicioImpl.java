@@ -51,6 +51,42 @@ public class ServicioImpl implements Servicio {
 	        con = pool.getConnection();
 	        con.setAutoCommit(false);
 
+
+			// FORMATEAR FECHA
+			// Crear un objeto SimpleDateFormat con el formato de fecha
+	        SimpleDateFormat sdf2 = new SimpleDateFormat("dd/MM/yyyy");
+
+	        // Formatear la fecha a String con el formato deseado
+	        String fechaString = sdf2.format(fecha);
+
+	        // Crear un objeto SimpleDateFormat con el formato deseado
+	        SimpleDateFormat sdf3 = new SimpleDateFormat("dd/MM/yyyy");
+
+	        // Parsear la cadena de texto a un objeto Date
+	        java.util.Date date2 = sdf3.parse(fechaString);
+
+	        // Crear un objeto java.sql.Date directamente
+	        java.sql.Date fechaSqlDate = new java.sql.Date(date2.getTime());
+	        
+	        // Formatear la fecha a String con el formato deseado
+	        String fechaFormateada = sdf3.format(fechaSqlDate);
+
+
+			//FORMATEAR HORA
+			// Conversion a horas
+	        int hours = horaTimestamp.getHours();
+	        int minutes = horaTimestamp.getMinutes();
+
+	        LocalTime horaLocalTime = LocalTime.of(hours, minutes);
+
+	        /// Define el formato deseado para la hora
+	        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm");
+
+		    // Formatea la hora local
+		    String horaFormateada = horaLocalTime.format(formatter);
+
+
+
 	        // Verificar si hay plazas suficientes para el viaje
 	        String query = "SELECT idViaje, nPlazasLibres FROM viajes JOIN recorridos ON viajes.idRecorrido = recorridos.idRecorrido "
 	                + "WHERE estacionOrigen = ? AND estacionDestino = ? AND horaSalida = ? AND fecha = ?";
@@ -62,7 +98,9 @@ public class ServicioImpl implements Servicio {
 	        st.setDate(4, fechaSqlDate);
 	        rs = st.executeQuery();
 
-	        if (!rs.next()) {
+			System.out.println("origen: " + origen + " \n" + "destino: " + destino + " \n" + "hora: " + horaFormateada + " \n" + "fechaDate: " + fechaSqlDate + "\n"+"fechaString: " + fechaFormateada + "\n");
+
+	        if (nPlazasLibres < nroPlazas) {
 	            throw new CompraBilleteTrenException(CompraBilleteTrenException.NO_PLAZAS);
 	        }
 
