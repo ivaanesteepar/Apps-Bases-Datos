@@ -58,18 +58,7 @@ public class ServicioImpl implements Servicio {
 
 	        // Formatear la fecha a String con el formato deseado
 	        String fechaString = sdf2.format(fecha);
-
-	        // Crear un objeto SimpleDateFormat con el formato deseado
-	        SimpleDateFormat sdf3 = new SimpleDateFormat("dd/MM/yyyy");
-
-	        // Parsear la cadena de texto a un objeto Date
-	        java.util.Date date2 = sdf3.parse(fechaString);
-
-	        // Crear un objeto java.sql.Date directamente
-	        java.sql.Date fechaSqlDate = new java.sql.Date(date2.getTime());
-	        
-	        // Formatear la fecha a String con el formato deseado
-	        String fechaFormateada = sdf3.format(fechaSqlDate);
+			
 
 
 		//FORMATEAR HORA
@@ -95,10 +84,10 @@ public class ServicioImpl implements Servicio {
 	        st.setString(1, origen);
 	        st.setString(2, destino);
 	        st.setTimestamp(3, horaTimestamp);
-	        st.setDate(4, fechaSqlDate);
+	        st.setString(4, fechaString);
 	        rs = st.executeQuery();
 
-		System.out.println("origen: " + origen + " \n" + "destino: " + destino + " \n" + "hora: " + horaFormateada + " \n" + "fechaDate: " + fechaSqlDate + "\n"+"fechaString: " + fechaFormateada + "\n");
+		System.out.println("origen: " + origen + " \n" + "destino: " + destino + " \n" + "hora: " + horaFormateada + " \n" + "fechaFormateada: " + fechaString + "\n");
 		
 		if (!rs.next()) {
 	            throw new CompraBilleteTrenException(CompraBilleteTrenException.NO_EXISTE_VIAJE);
