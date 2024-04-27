@@ -72,11 +72,10 @@ try {
 	            con.commit();
 	        }
 	        
-	     	// Imprimir las filas de la tabla tickets y las horas de salida después de la anulación
+	     // Imprimir las filas de la tabla tickets y las horas de salida después de la anulación
 	        String queryAfter = "SELECT t.idTicket, v.fecha, r.horaSalida, t.cantidad, t.precio " +
-	                            "FROM tickets t " +
-	                            "INNER JOIN viajes v ON t.idViaje = v.idViaje " +
-	                            "INNER JOIN recorridos r ON v.idRecorrido = r.idRecorrido";
+	                            "FROM tickets t JOIN viajes v ON (t.idViaje = v.idViaje) " +
+	                            "JOIN recorridos r ON (v.idRecorrido = r.idRecorrido)";
 	        st = con.prepareStatement(queryAfter);
 	        rs = st.executeQuery();
 
@@ -96,7 +95,7 @@ try {
 	        
 } catch (SQLException e) {
 	if (con != null) {
-		con.rollback();
+	    con.rollback();
 	}
 	LOGGER.error("Error al anular el billete: ", e);
 	throw e;
@@ -106,9 +105,6 @@ try {
 	}
 	if (con != null) {
 	    con.setAutoCommit(true);
-		con.close();
+	    con.close();
 	}
 }
-			
-		
-	
