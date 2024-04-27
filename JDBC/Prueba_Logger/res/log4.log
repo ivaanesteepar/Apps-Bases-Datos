@@ -1,2 +1,0 @@
-WARN : [Prueba.main(Prueba.java:19)]2024-04-04 09:09:06.484 [main] Prueba - Esta es una notificacion warn, la usaremos para los warnings
-ERROR: [Prueba.main(Prueba.java:20)]2024-04-04 09:09:06.486 [main] Prueba - Esta es una notificacion error, la usaremos cuando se lance una excepcion
