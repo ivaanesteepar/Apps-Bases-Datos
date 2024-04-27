@@ -213,9 +213,7 @@ public class ServicioImpl implements Servicio {
 		        
 		        if (rsPrecio.next()) {
 		            precioUnitario = rsPrecio.getDouble("precio");
-		            //st.setDouble(4, nroPlazas * precioUnitario);
 		            precioTotal = nroPlazas * precioUnitario;
-		            //st.executeUpdate();
 		            System.out.println(" precioTotal: " + precioTotal);
 		        } 
 		        else {
