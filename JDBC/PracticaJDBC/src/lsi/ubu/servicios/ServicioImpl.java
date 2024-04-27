@@ -247,36 +247,31 @@ public class ServicioImpl implements Servicio {
 		        
 		      
 		        int filasBorradas= st.executeUpdate();
-				if (filasBorradas==0) {
-					System.out.println("No se ha actualizado la fila.");
-					//con.rollback();
-				}else {
-					System.out.println("Se ha actualizado la fila.");
-					con.commit();
-				}
-		        //con.commit();
+			if (filasBorradas==0) {
+				System.out.println("No se ha actualizado la fila.");
+			} else {
+				System.out.println("Se ha actualizado la fila.");
+				con.commit();
+			}
 				
-				st = con.prepareStatement(
-						" SELECT IDVIAJE||IDTREN||IDRECORRIDO||FECHA||NPLAZASLIBRES||REALIZADO||IDCONDUCTOR||IDTICKET||CANTIDAD||PRECIO "
-								+ " FROM VIAJES natural join tickets "
-								+ " where idticket=3 and trunc(fechacompra) = trunc(current_date) ");
-				rs = st.executeQuery();
+			st = con.prepareStatement(" SELECT IDVIAJE||IDTREN||IDRECORRIDO||FECHA||NPLAZASLIBRES||REALIZADO||IDCONDUCTOR||IDTICKET||CANTIDAD||PRECIO "
+					+ " FROM VIAJES natural join tickets "
+					+ " where idticket=3 and trunc(fechacompra) = trunc(current_date) ");
+			rs = st.executeQuery();
 	
-				String resultadoReal = "";
-				while (rs.next()) {
-					resultadoReal += rs.getString(1);
-					System.out.println("reusltado: " + resultadoReal);
-				}
+			String resultadoReal = "";
+			while (rs.next()) {
+				resultadoReal += rs.getString(1);
+				System.out.println("resultado: " + resultadoReal);
+			}
 		        
-		} 
-		catch (SQLException e) {
+		} catch (SQLException e) {
 		        if (con != null) {
 		            con.rollback();
 		        }
 		        LOGGER.error("Error al comprar el billete: ", e);
 		        throw e;
-		} 
-		finally {
+		} finally {
 		        if (rs != null) {
 		            rs.close();
 		        }
