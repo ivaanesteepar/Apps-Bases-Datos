@@ -156,112 +156,138 @@ public class ServicioImpl implements Servicio {
 
 		// A completar por el alumno
 		try {
-	        con = pool.getConnection();
-	        con.setAutoCommit(false);
-
-
-		// FORMATEAR FECHA
-		// Crear un objeto SimpleDateFormat con el formato de fecha
-	        SimpleDateFormat sdf2 = new SimpleDateFormat("dd/MM/yyyy");
-
-	        // Formatear la fecha a String con el formato deseado
-	        String fechaString = sdf2.format(fecha);
-			
-
-
-		//FORMATEAR HORA
-		// Conversion a horas
-	        int hours = horaTimestamp.getHours();
-	        int minutes = horaTimestamp.getMinutes();
-
-	        LocalTime horaLocalTime = LocalTime.of(hours, minutes);
-
-	        /// Define el formato deseado para la hora
-	        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm");
-
-		// Formatea la hora local
-		String horaFormateada = horaLocalTime.format(formatter);
-
-
-
-	        // Verificar si hay plazas suficientes para el viaje
-	        String query = "SELECT idViaje, nPlazasLibres FROM viajes JOIN recorridos ON viajes.idRecorrido = recorridos.idRecorrido "
-	                + "WHERE estacionOrigen = ? AND estacionDestino = ? AND horaSalida = ? AND fecha = ?";
-	        
-	        st = con.prepareStatement(query);
-	        st.setString(1, origen);
-	        st.setString(2, destino);
-	        st.setTimestamp(3, horaTimestamp);
-	        st.setString(4, fechaString);
-	        rs = st.executeQuery();
-
-		System.out.println("origen: " + origen + " \n" + "destino: " + destino + " \n" + "hora: " + horaFormateada + " \n" + "fechaFormateada: " + fechaString + "\n");
-		
-		if (!rs.next()) {
-	            throw new CompraBilleteTrenException(CompraBilleteTrenException.NO_EXISTE_VIAJE);
-	        }
-
-	        int idViaje = rs.getInt("idViaje");
-	        int nPlazasLibres = rs.getInt("nPlazasLibres");
-
-		if (nPlazasLibres < nroPlazas) {
-	            throw new CompraBilleteTrenException(CompraBilleteTrenException.NO_PLAZAS);
-	        }
-
-	        // Insertar fila en la tabla de tickets
-	        query = "INSERT INTO tickets (idViaje, fechaCompra, cantidad, precio) VALUES (?, ?, ?, ?)";
-	        st = con.prepareStatement(query);
-	        st.setInt(1, idViaje);
-	        st.setDate(2, fechaSqlDate);
-	        st.setInt(3, nroPlazas);
-
-	        
-	        // Obtener el precio del recorrido
-	        query = "SELECT precio FROM recorridos WHERE idRecorrido = ?";
-	        PreparedStatement stPrecio = con.prepareStatement(query);
-	        stPrecio.setInt(1, idViaje);
-	        ResultSet rsPrecio = stPrecio.executeQuery();
-
-	        if (rsPrecio.next()) {
-	            double precioUnitario = rsPrecio.getDouble("precio");
-	            st.setDouble(4, nroPlazas * precioUnitario);
-	            st.executeUpdate();
-	        } 
-	        else {
-	            // Lanzamos una SQLException
-	            throw new SQLException("Error en la obtención del precio del recorrido");
-	        }
-
-	        // Actualizar el número de plazas libres para el viaje después de la inserción
-	        nPlazasLibres -= nroPlazas;
-	        query = "UPDATE viajes SET nPlazasLibres = ? WHERE idViaje = ?";
-	        st = con.prepareStatement(query);
-	        st.setInt(1, nPlazasLibres);
-	        st.setInt(2, idViaje);
-	        st.executeUpdate();
-
-	        con.commit();
-	        
-	    } 
+		        con = pool.getConnection();
+		        con.setAutoCommit(false);
+		        
+		        SimpleDateFormat sdfFecha = new SimpleDateFormat("dd/MM/yyyy");
+		        SimpleDateFormat sdfHora = new SimpleDateFormat("HH:mm");
+	
+		        String fechaFormateada = sdfFecha.format(fecha);
+		        String horaFormateada = sdfHora.format(hora);
+	
+		        System.out.println("Fecha formateada: " + fechaFormateada);
+		        System.out.println("Hora formateada: " + horaFormateada);
+	
+		        // Consulta SQL para verificar la existencia del viaje
+		        st = con.prepareStatement("SELECT idViaje, nPlazasLibres FROM viajes JOIN recorridos ON viajes.idRecorrido = recorridos.idRecorrido "
+		                + "WHERE estacionOrigen = ? AND estacionDestino = ? "
+		                + "AND TO_CHAR(horaSalida, 'HH24:MI') = ? AND TO_CHAR(fecha, 'DD/MM/YYYY') = ?");
+		        
+		        st.setString(1, origen);
+		        st.setString(2, destino);
+		        st.setString(3, horaFormateada);
+		        st.setString(4, fechaFormateada);
+	
+		        rs = st.executeQuery();
+		        
+		            
+		        // Comprobar si hay al menos una fila en el ResultSet
+		        if (!rs.next()) {
+		            throw new CompraBilleteTrenException(CompraBilleteTrenException.NO_EXISTE_VIAJE);
+		        }
+	
+		        // Obtener valores del ResultSet
+		        int idViaje = rs.getInt("idViaje");
+		        int nPlazasLibres = rs.getInt("nPlazasLibres");
+	
+		        // Verificar si hay suficientes plazas libres
+		        if (nPlazasLibres < nroPlazas) {
+		            throw new CompraBilleteTrenException(CompraBilleteTrenException.NO_PLAZAS);
+		        }
+		        
+		        // Obtener el próximo valor de la secuencia seq_tickets
+		        st = con.prepareStatement("SELECT seq_tickets.NEXTVAL FROM tickets");
+		        rs = st.executeQuery();
+		        int vIdTicket = 0;
+		        if (rs.next()) {
+		            vIdTicket = rs.getInt(1);
+		            System.out.println(" idticket: " + vIdTicket);
+		        }
+		        
+		        // Obtener el precio del recorrido
+		        st = con.prepareStatement("SELECT precio FROM recorridos WHERE idRecorrido = ?");
+		        st.setInt(1, idViaje);
+		        ResultSet rsPrecio = st.executeQuery();
+		        double precioUnitario = 0;
+		        double precioTotal = 0;
+		        
+		        if (rsPrecio.next()) {
+		            precioUnitario = rsPrecio.getDouble("precio");
+		            //st.setDouble(4, nroPlazas * precioUnitario);
+		            precioTotal = nroPlazas * precioUnitario;
+		            //st.executeUpdate();
+		            System.out.println(" precioTotal: " + precioTotal);
+		        } 
+		        else {
+		            // Lanzamos una SQLException
+		            throw new SQLException("Error en la obtención del precio del recorrido");
+		        }
+	
+		        // Insertar fila en la tabla de tickets
+		        st = con.prepareStatement("INSERT INTO tickets (idTicket, idViaje, fechaCompra, cantidad, precio) VALUES (?, ?, ?, ?, ?)");
+		        
+		        st.setInt(1,vIdTicket);
+		        st.setInt(2, idViaje);
+		        st.setDate(3, fechaSqlDate);
+		        st.setInt(4, nroPlazas);
+		        st.setDouble(5, precioTotal);
+		        
+		        int rowsInserted = st.executeUpdate();
+		        if (rowsInserted > 0) {
+		            System.out.println("A row has been inserted into the tickets table.");
+		        } else {
+		            System.out.println("No rows have been inserted into the tickets table.");
+		        }
+		        
+		        // Actualizar el número de plazas libres para el viaje después de la inserción
+		        nPlazasLibres -= nroPlazas;
+		        st = con.prepareStatement("UPDATE viajes SET nPlazasLibres = ? WHERE idViaje = ?");
+		        st.setInt(1, nPlazasLibres);
+		        st.setInt(2, idViaje);
+		        
+		      
+		        int filasBorradas= st.executeUpdate();
+				if (filasBorradas==0) {
+					System.out.println("No se ha actualizado la fila.");
+					//con.rollback();
+				}else {
+					System.out.println("Se ha actualizado la fila.");
+					con.commit();
+				}
+		        //con.commit();
+				
+				st = con.prepareStatement(
+						" SELECT IDVIAJE||IDTREN||IDRECORRIDO||FECHA||NPLAZASLIBRES||REALIZADO||IDCONDUCTOR||IDTICKET||CANTIDAD||PRECIO "
+								+ " FROM VIAJES natural join tickets "
+								+ " where idticket=3 and trunc(fechacompra) = trunc(current_date) ");
+				rs = st.executeQuery();
+	
+				String resultadoReal = "";
+				while (rs.next()) {
+					resultadoReal += rs.getString(1);
+					System.out.println("reusltado: " + resultadoReal);
+				}
+		        
+		} 
 		catch (SQLException e) {
-	        if (con != null) {
-	            con.rollback();
-	        }
-	        LOGGER.error("Error al comprar el billete: ", e);
-	        throw e;
-	    } 
+		        if (con != null) {
+		            con.rollback();
+		        }
+		        LOGGER.error("Error al comprar el billete: ", e);
+		        throw e;
+		} 
 		finally {
-	        if (rs != null) {
-	            rs.close();
+		        if (rs != null) {
+		            rs.close();
+		        }
+		        if (st != null) {
+		            st.close();
+		        }
+		        if (con != null) {
+		            con.setAutoCommit(true);
+		            con.close();
+		        }
 	        }
-	        if (st != null) {
-	            st.close();
-	        }
-	        if (con != null) {
-	            con.setAutoCommit(true);
-	            con.close();
-	        }
-	    }
 		
 		
 	}
