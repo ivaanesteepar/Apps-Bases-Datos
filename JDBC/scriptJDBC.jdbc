@@ -1,1 +1,113 @@
+try {
+	        con = pool.getConnection();
+	        con.setAutoCommit(false);
+	        
+	     // Imprimir las filas de la tabla tickets y las horas de salida antes de la anulación
+	        String queryBefore = "SELECT t.idTicket, v.fecha, r.horaSalida, t.cantidad, t.precio " +
+	                             "FROM tickets t " +
+	                             "INNER JOIN viajes v ON t.idViaje = v.idViaje " +
+	                             "INNER JOIN recorridos r ON v.idRecorrido = r.idRecorrido";
+	        st = con.prepareStatement(queryBefore);
+	        rs = st.executeQuery();
+	        
+	        System.out.println("Filas de la tabla tickets antes de la anulación:");
+	        while (rs.next()) {
+	            int idTicket = rs.getInt("idTicket");
+	            Date fechaCompra = rs.getDate("fecha");
+	            Time horaSalida = rs.getTime("horaSalida");
+	            int cantidad = rs.getInt("cantidad");
+	            double precio = rs.getDouble("precio");
 
+	            System.out.println("ID Ticket: " + idTicket + ", Fecha Viaje: " + fechaCompra +
+	                               ", Hora Salida: " + horaSalida + ", Cantidad: " + cantidad +
+	                               ", Precio: " + precio);
+	        }
+	       
+	        SimpleDateFormat sdfFecha = new SimpleDateFormat("dd/MM/yyyy");
+	        SimpleDateFormat sdfHora = new SimpleDateFormat("HH:mm");
+
+	        String fechaFormateada = sdfFecha.format(fecha);
+	        String horaFormateada = sdfHora.format(hora);
+
+	        System.out.println("Fecha formateada: " + fechaFormateada);
+	        System.out.println("Hora formateada: " + horaFormateada);
+
+	     // Consulta SQL para verificar la existencia del viaje
+	        st = con.prepareStatement("SELECT idViaje, nPlazasLibres FROM viajes JOIN recorridos ON viajes.idRecorrido = recorridos.idRecorrido "
+	                + "WHERE estacionOrigen = ? AND estacionDestino = ? "
+	                + "AND TO_CHAR(horaSalida, 'HH24:MI') = ? AND TO_CHAR(fecha, 'DD/MM/YYYY') = ?");
+	        
+	        st.setString(1, origen);
+	        st.setString(2, destino);
+	        st.setString(3, horaFormateada);
+	        st.setString(4, fechaFormateada);
+
+	        rs = st.executeQuery();
+	        
+	            
+	     // Comprobar si hay al menos una fila en el ResultSet
+	        if (!rs.next()) {
+	            throw new CompraBilleteTrenException(CompraBilleteTrenException.NO_EXISTE_VIAJE);
+	        }
+	        
+	     // Obtener valores del ResultSet
+	        int idViaje = rs.getInt("idViaje");
+	        int nPlazasLibres = rs.getInt("nPlazasLibres");
+	        System.out.println("idVIaje: "+ idViaje + "plazas: " +nPlazasLibres);
+
+	        // Verificar si hay suficientes plazas libres
+	        if (nPlazasLibres < nroPlazas) {
+	            throw new CompraBilleteTrenException(CompraBilleteTrenException.NO_PLAZAS);
+	        }
+
+	        // Consulta SQL para anular el billete
+	        String query = "DELETE FROM tickets WHERE idTicket = ?";
+	        st = con.prepareStatement(query);
+	        st.setInt(1, ticket);
+	        st.setString(2, fechaFormateada);
+
+	        int filasBorradas = st.executeUpdate();
+
+	        if (filasBorradas == 0) {
+	            System.out.println("No se ha anulado ningún billete.");
+	        } else {
+	            System.out.println("Se ha anulado el billete correctamente.");
+	            con.commit();
+	        }
+	        
+	     // Imprimir las filas de la tabla tickets y las horas de salida después de la anulación
+	        String queryAfter = "SELECT t.idTicket, v.fecha, r.horaSalida, t.cantidad, t.precio " +
+	                            "FROM tickets t " +
+	                            "INNER JOIN viajes v ON t.idViaje = v.idViaje " +
+	                            "INNER JOIN recorridos r ON v.idRecorrido = r.idRecorrido";
+	        st = con.prepareStatement(queryAfter);
+	        rs = st.executeQuery();
+
+	        System.out.println("Filas de la tabla tickets después de la anulación:");
+	        while (rs.next()) {
+	            int idTicket = rs.getInt("idTicket");
+	            Date fechaCompra = rs.getDate("fecha");
+	            Time horaSalida = rs.getTime("horaSalida");
+	            int cantidad = rs.getInt("cantidad");
+	            double precio = rs.getDouble("precio");
+
+	            System.out.println("ID Ticket: " + idTicket + ", Fecha Viaje: " + fechaCompra +
+	                               ", Hora Salida: " + horaSalida + ", Cantidad: " + cantidad +
+	                               ", Precio: " + precio);
+	        }
+	        
+	    } catch (SQLException e) {
+	        if (con != null) {
+	            con.rollback();
+	        }
+	        LOGGER.error("Error al anular el billete: ", e);
+	        throw e;
+	    } finally {
+	        if (st != null) {
+	            st.close();
+	        }
+	        if (con != null) {
+	            con.setAutoCommit(true);
+	            con.close();
+	        }
+	    }
