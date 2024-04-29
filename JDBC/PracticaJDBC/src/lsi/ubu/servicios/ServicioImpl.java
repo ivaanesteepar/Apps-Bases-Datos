@@ -33,27 +33,6 @@ public class ServicioImpl implements Servicio {
 		try {
 		        con = pool.getConnection();
 		        con.setAutoCommit(false);
-		        
-		     	// Imprimir las filas de la tabla tickets y las horas de salida antes de la anulación
-		        String queryBefore = "SELECT t.idTicket, v.fecha, r.horaSalida, t.cantidad, t.precio " +
-		                             "FROM tickets t " +
-		                             "INNER JOIN viajes v ON t.idViaje = v.idViaje " +
-		                             "INNER JOIN recorridos r ON v.idRecorrido = r.idRecorrido";
-		        st = con.prepareStatement(queryBefore);
-		        rs = st.executeQuery();
-		        
-		        System.out.println("Filas de la tabla tickets antes de la anulación:");
-		        while (rs.next()) {
-		            int idTicket = rs.getInt("idTicket");
-		            Date fechaCompra = rs.getDate("fecha");
-		            Time horaSalida = rs.getTime("horaSalida");
-		            int cantidad = rs.getInt("cantidad");
-		            double precio = rs.getDouble("precio");
-	
-		            System.out.println("ID Ticket: " + idTicket + ", Fecha Viaje: " + fechaCompra +
-		                               ", Hora Salida: " + horaSalida + ", Cantidad: " + cantidad +
-		                               ", Precio: " + precio);
-		        }
 		       
 		        SimpleDateFormat sdfFecha = new SimpleDateFormat("dd/MM/yyyy");
 		        SimpleDateFormat sdfHora = new SimpleDateFormat("HH:mm");
@@ -96,29 +75,22 @@ public class ServicioImpl implements Servicio {
 		            System.out.println("No se ha anulado ningún billete.");
 		        } else {
 		            System.out.println("Se ha anulado el billete correctamente.");
-		            con.commit();
 		        }
-		        
-		    	// Imprimir las filas de la tabla tickets y las horas de salida después de la anulación
-		        String queryAfter = "SELECT t.idTicket, v.fecha, r.horaSalida, t.cantidad, t.precio " +
-		                            "FROM tickets t JOIN viajes v ON (t.idViaje = v.idViaje) " +
-		                            "JOIN recorridos r ON (v.idRecorrido = r.idRecorrido)";
-		        st = con.prepareStatement(queryAfter);
-		        rs = st.executeQuery();
-	
-		        System.out.println("Filas de la tabla tickets después de la anulación:");
-		        
-		        while (rs.next()) {
-		            int idTicket = rs.getInt("idTicket");
-		            Date fechaCompra = rs.getDate("fecha");
-		            Time horaSalida = rs.getTime("horaSalida");
-		            int cantidad = rs.getInt("cantidad");
-		            double precio = rs.getDouble("precio");
-	
-		            System.out.println("ID Ticket: " + idTicket + ", Fecha Viaje: " + fechaCompra +
-		                               ", Hora Salida: " + horaSalida + ", Cantidad: " + cantidad +
-		                               ", Precio: " + precio);
-		        }
+
+			// Actualizamos las plazas libres
+			nPlazasLibres += nroPlazas;
+			st = con.prepareStatement("UPDATE viajes SET nPlazasLibres = ? WHERE idViaje = ?");
+			st.setInt(1, nPlazasLibres);
+			st.setInt(2, idViaje);
+
+			contPlazasLibres = st.executeUpdate();
+
+			if (contPlazasLibres >= 1){
+				System.out.println("Se ha actualizado el numero de plazas libres");
+				con.commit();
+			} else {
+				System.out.println("No se ha actualizado el numero de plazas libres");
+			}
 	        
 	    } catch (SQLException e) {
 	        if (con != null) {
@@ -235,24 +207,13 @@ public class ServicioImpl implements Servicio {
 		        st.setInt(1, nPlazasLibres);
 		        st.setInt(2, idViaje);
 		        
-		      
-		        int filasBorradas= st.executeUpdate();
-			if (filasBorradas==0) {
+		        int filasInsertadas= st.executeUpdate();
+			
+			if (filasInsertadas == 0) {
 				System.out.println("No se ha actualizado la fila.");
 			} else {
 				System.out.println("Se ha actualizado la fila.");
 				con.commit();
-			}
-				
-			st = con.prepareStatement(" SELECT IDVIAJE||IDTREN||IDRECORRIDO||FECHA||NPLAZASLIBRES||REALIZADO||IDCONDUCTOR||IDTICKET||CANTIDAD||PRECIO "
-					+ " FROM VIAJES natural join tickets "
-					+ " where idticket=3 and trunc(fechacompra) = trunc(current_date) ");
-			rs = st.executeQuery();
-	
-			String resultadoReal = "";
-			while (rs.next()) {
-				resultadoReal += rs.getString(1);
-				System.out.println("resultado: " + resultadoReal);
 			}
 		        
 		} catch (SQLException e) {
