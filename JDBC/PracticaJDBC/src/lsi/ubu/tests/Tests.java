@@ -34,10 +34,9 @@ public class Tests {
 		PreparedStatement st = null;
 		ResultSet rs = null;
 
-		// A completar por el alumno
 		// Prueba caso no existe el viaje
 		try {
-			System.out.println("\nTest 1 anular: no exste viaje");
+			System.out.println("\nTest 1 anular: no existe viaje");
 					
 			java.util.Date fecha = toDate("15/04/2010");
 			Time hora = Time.valueOf("12:00:00");
@@ -47,6 +46,7 @@ public class Tests {
 			servicio.anularBillete(hora, fecha, ORIGEN, DESTINO, nroPlazas, ticket);
 
 			LOGGER.info("NO se da cuenta de que no existe el viaje MAL");
+			
 		} catch (SQLException e) {
 			if (e.getErrorCode() == CompraBilleteTrenException.NO_EXISTE_VIAJE) {
 				LOGGER.info("Se da cuenta de que no existe el viaje OK");
@@ -63,7 +63,8 @@ public class Tests {
 					
 			servicio.anularBillete(hora, fecha, ORIGEN, DESTINO, nroPlazas, ticket);
 
-				LOGGER.info("NO se da cuenta de que no hay plazas MAL");
+			LOGGER.info("NO se da cuenta de que no hay plazas MAL");
+			
 		} catch (SQLException e) {
 			if (e.getErrorCode() == CompraBilleteTrenException.NO_PLAZAS) {
 				LOGGER.info("Se da cuenta de que no hay plazas OK");
@@ -72,35 +73,35 @@ public class Tests {
 		
 		// Prueba caso si existe y si hay plazas
 		try {
-	        System.out.println("\nTest 3: anula bien");
-			
-	        java.util.Date fecha = toDate("20/04/2022");
-	        Time hora = Time.valueOf("8:30:00");
-	        int nroPlazas = 1;
-	        int ticket = 1; // ID del billete que queremos anular
-
-	        // Anular el billete
-	        servicio.anularBillete(hora, fecha, ORIGEN, DESTINO, nroPlazas, ticket);
-
-	        // Verificar si se ha anulado correctamente
-	        con = pool.getConnection();
-	        st = con.prepareStatement("SELECT COUNT(*) FROM tickets WHERE idTicket = ?");
-	        st.setInt(1, ticket);
-	        rs = st.executeQuery();
-
-	        int count = 0;
-	        if (rs.next()) {
-	            count = rs.getInt(1);
-	        }
-	        
-	        if (count == 0) {
-	            LOGGER.info("Anular billete OK");
-	        } else {
-	            LOGGER.info("Anular billete MAL");
-	        }
-	    } catch (SQLException e) {
-	        LOGGER.info("Error al anular billete: " + e.getMessage());
-	    }
+		        System.out.println("\nTest 3: anula bien");
+				
+		        java.util.Date fecha = toDate("20/04/2022");
+		        Time hora = Time.valueOf("8:30:00");
+		        int nroPlazas = 1;
+		        int ticket = 1; // ID del billete que queremos anular
+	
+		        // Anular el billete
+		        servicio.anularBillete(hora, fecha, ORIGEN, DESTINO, nroPlazas, ticket);
+	
+		        // Verificar si se ha anulado correctamente
+		        con = pool.getConnection();
+		        st = con.prepareStatement("SELECT COUNT(*) FROM tickets WHERE idTicket = ?");
+		        st.setInt(1, ticket);
+		        rs = st.executeQuery();
+	
+		        int count = 0;
+		        if (rs.next()) {
+		            count = rs.getInt(1);
+		        }
+		        
+		        if (count == 0) {
+		            LOGGER.info("Anular billete OK");
+		        } else {
+		            LOGGER.info("Anular billete MAL");
+		        }
+		} catch (SQLException e) {
+		        LOGGER.info("Error al anular billete: " + e.getMessage());
+		}
 	}
 
 	public void ejecutarTestsCompraBilletes() {
@@ -155,7 +156,7 @@ public class Tests {
 			st = con.prepareStatement(
 					" SELECT IDVIAJE||IDTREN||IDRECORRIDO||FECHA||NPLAZASLIBRES||REALIZADO||IDCONDUCTOR||IDTICKET||CANTIDAD||PRECIO "
 							+ " FROM VIAJES natural join tickets "
-							+ " where idticket=3 and trunc(fechacompra) = trunc(current_date) ");
+							+ " where idticket=3 and trunc(fechacompra) = trunc(fecha) ");
 			rs = st.executeQuery();
 
 			String resultadoReal = "";
@@ -164,8 +165,8 @@ public class Tests {
 			}
 
 			String resultadoEsperado = "11120/04/2225113550";
-			// LOGGER.info("R"+resultadoReal);
-			// LOGGER.info("E"+resultadoEsperado);
+			LOGGER.info("R"+resultadoReal);
+			LOGGER.info("E"+resultadoEsperado);
 			if (resultadoReal.equals(resultadoEsperado)) {
 				LOGGER.info("Compra ticket OK");
 			} else {
