@@ -61,9 +61,6 @@ public class ServicioImpl implements Servicio {
 		        String fechaFormateada = sdfFecha.format(fecha);
 		        String horaFormateada = sdfHora.format(hora);
 	
-		        System.out.println("Fecha formateada: " + fechaFormateada);
-		        System.out.println("Hora formateada: " + horaFormateada);
-	
 		     	// Consulta SQL para verificar la existencia del viaje
 		        st = con.prepareStatement("SELECT idViaje, nPlazasLibres FROM viajes JOIN recorridos ON viajes.idRecorrido = recorridos.idRecorrido "
 		                + "WHERE estacionOrigen = ? AND estacionDestino = ? "
@@ -165,9 +162,6 @@ public class ServicioImpl implements Servicio {
 		        String fechaFormateada = sdfFecha.format(fecha);
 		        String horaFormateada = sdfHora.format(hora);
 	
-		        System.out.println("Fecha formateada: " + fechaFormateada);
-		        System.out.println("Hora formateada: " + horaFormateada);
-	
 		        // Consulta SQL para verificar la existencia del viaje
 		        st = con.prepareStatement("SELECT idViaje, nPlazasLibres FROM viajes JOIN recorridos ON viajes.idRecorrido = recorridos.idRecorrido "
 		                + "WHERE estacionOrigen = ? AND estacionDestino = ? "
@@ -201,7 +195,6 @@ public class ServicioImpl implements Servicio {
 		        int vIdTicket = 0;
 		        if (rs.next()) {
 		            vIdTicket = rs.getInt(1);
-		            System.out.println(" idticket: " + vIdTicket);
 		        }
 		        
 		        // Obtener el precio del recorrido
@@ -214,8 +207,7 @@ public class ServicioImpl implements Servicio {
 		        if (rsPrecio.next()) {
 		            precioUnitario = rsPrecio.getDouble("precio");
 		            precioTotal = nroPlazas * precioUnitario;
-		            System.out.println(" precioTotal: " + precioTotal);
-		        } 
+			} 
 		        else {
 		            // Lanzamos una SQLException
 		            throw new SQLException("Error en la obtención del precio del recorrido");
@@ -232,9 +224,9 @@ public class ServicioImpl implements Servicio {
 		        
 		        int rowsInserted = st.executeUpdate();
 		        if (rowsInserted > 0) {
-		            System.out.println("A row has been inserted into the tickets table.");
+		            System.out.println("Se ha insertado la fila.");
 		        } else {
-		            System.out.println("No rows have been inserted into the tickets table.");
+		            System.out.println("NO se ha insertado la fila.");
 		        }
 		        
 		        // Actualizar el número de plazas libres para el viaje después de la inserción
