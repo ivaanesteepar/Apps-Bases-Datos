@@ -195,6 +195,7 @@ public class ServicioImpl implements Servicio {
 		        st.setDouble(5, precioTotal);
 		        
 		        int rowsInserted = st.executeUpdate();
+			
 		        if (rowsInserted > 0) {
 		            System.out.println("Se ha insertado la fila.");
 		        } else {
