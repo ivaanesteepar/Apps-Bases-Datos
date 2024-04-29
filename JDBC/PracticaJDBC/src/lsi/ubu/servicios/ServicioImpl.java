@@ -85,7 +85,7 @@ public class ServicioImpl implements Servicio {
 
 			contPlazasLibres = st.executeUpdate();
 
-			if (contPlazasLibres >= 1){
+			if (contPlazasLibres == 1){
 				System.out.println("Se ha actualizado el numero de plazas libres");
 				con.commit();
 			} else {
