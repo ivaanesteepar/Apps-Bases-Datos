@@ -145,8 +145,7 @@ public class ServicioImpl implements Servicio {
 		        st.setString(4, fechaFormateada);
 	
 		        rs = st.executeQuery();
-		        
-		            
+
 		        // Comprobar si hay al menos una fila en el ResultSet
 		        if (!rs.next()) {
 		            throw new CompraBilleteTrenException(CompraBilleteTrenException.NO_EXISTE_VIAJE);
@@ -170,14 +169,16 @@ public class ServicioImpl implements Servicio {
 		        }
 		        
 		        // Obtener el precio del recorrido
-		        st = con.prepareStatement("SELECT precio FROM recorridos WHERE idRecorrido = ?");
+		        st = con.prepareStatement("SELECT precio FROM recorridos "
+	        		+ "join viajes on (recorridos.idRecorrido = viajes.idRecorrido) WHERE idViaje = ?");
 		        st.setInt(1, idViaje);
-		        ResultSet rsPrecio = st.executeQuery();
+			
+		        rs = st.executeQuery();
+			
 		        double precioUnitario = 0;
 		        double precioTotal = 0;
-		        
 		        if (rsPrecio.next()) {
-		            precioUnitario = rsPrecio.getDouble("precio");
+		            precioUnitario = rs.getDouble("precio");
 		            precioTotal = nroPlazas * precioUnitario;
 			} 
 		        else {
