@@ -11,7 +11,6 @@ import java.util.Set;
  * 
  */
 @Entity
-@NamedQuery(name="Conductor.findAll", query="SELECT c FROM Conductor c")
 public class Conductor implements Serializable {
 	private static final long serialVersionUID = 1L;
 
