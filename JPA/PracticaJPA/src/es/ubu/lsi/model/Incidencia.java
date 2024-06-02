@@ -10,7 +10,6 @@ import javax.persistence.*;
  * The persistent class for the INCIDENCIA database table.
  * 
  */
-
 @Entity
 public class Incidencia implements Serializable {
 
@@ -77,11 +76,11 @@ public class Incidencia implements Serializable {
 	public void setTipoincidencia(Tipoincidencia tipoincidencia) {
 		this.tipoincidencia = tipoincidencia;
 	}
-
+	
 
 	@Override
 	public String toString() {
-		return "Incidencia: id - " + id + ", anotaci�n - " + anotacion 
+		return "Incidencia: id - " + id + ", anotacion - " + anotacion 
 				+ ", conductor - " + conductor + ", tipo de incidencia - " 
 				+ tipoincidencia;
 	}
