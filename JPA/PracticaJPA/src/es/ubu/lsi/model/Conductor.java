@@ -19,12 +19,6 @@ public class Conductor implements Serializable {
 
 	private String apellido;
 
-	@Embedded
-	@AttributeOverrides({
-		@AttributeOverride(name="direccion", column = @Column(name="direccion")),
-		@AttributeOverride(name="cp", column = @Column(name="cp")),
-		@AttributeOverride(name="ciudad", column = @Column(name="ciudad")),
-	})
 	private DireccionPostal direccion;
 
 	private String nombre;
