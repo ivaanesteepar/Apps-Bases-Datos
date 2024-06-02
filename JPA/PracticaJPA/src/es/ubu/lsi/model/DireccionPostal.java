@@ -10,9 +10,7 @@ import javax.persistence.*;
  * Entity implementation class for Entity: DireccionPostal
  *
  */
-
 @Embeddable
-  
 public class DireccionPostal implements Serializable {
 
 	private static final long serialVersionUID = 1L;
@@ -50,7 +48,7 @@ public class DireccionPostal implements Serializable {
 
 	@Override
 	public String toString() {
-		return "DireccionPostal: Direcci�n - " + direccion + ", c�digo postal - " 
+		return "DireccionPostal: Direccion - " + direccion + ", codigo postal - " 
 				+ cp + ", ciudad - " + ciudad;
 	}
 
