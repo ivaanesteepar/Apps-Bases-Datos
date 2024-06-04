@@ -62,7 +62,7 @@ public class Vehiculo implements Serializable {
 
 	@Override
 	public String toString() {
-		return "Veh�culo: idAuto - " + idauto + ", nombre - " 
-				+ nombre + ", direcci�n postal - " + direccion;
+		return "Vehiculo: idAuto - " + idauto + ", nombre - " 
+				+ nombre + ", direccion postal - " + direccion;
 	}
 }
