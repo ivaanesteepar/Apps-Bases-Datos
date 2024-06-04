@@ -54,7 +54,7 @@ public class ServiceImpl extends PersistenceService implements Service {
 			
 			conductor.setPuntos(puntosRestantes);
 			
-			// Construir la consulta de inserción manualmente	        
+		// Construir la consulta de inserción manualmente	        
 	        Query query = em.createNativeQuery("INSERT INTO Incidencia (fecha, nif, idtipo) VALUES (:fecha, :nif, :tipo)");
 	               
 	        query.setParameter("fecha", fecha);
