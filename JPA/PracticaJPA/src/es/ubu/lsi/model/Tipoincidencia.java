@@ -78,7 +78,7 @@ public class TipoIncidencia implements Serializable {
 	
 	@Override
 	public String toString() {
-		return "Tipo de incidencia: id - " + id + ", descripci�n - " + descripcion 
+		return "Tipo de incidencia: id - " + id + ", descripción - " + descripcion 
 				+ ", valor - " + valor + ", incidencias - " + incidencias;
 	}
 }
