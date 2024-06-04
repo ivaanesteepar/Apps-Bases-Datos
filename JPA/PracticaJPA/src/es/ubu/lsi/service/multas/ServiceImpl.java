@@ -47,7 +47,7 @@ public class ServiceImpl extends PersistenceService implements Service {
 			BigDecimal puntosConductor = conductor.getPuntos();
 			BigDecimal puntosTipoIncidencia = tIncidencia.getValor();
 			BigDecimal puntosRestantes = puntosConductor.subtract(puntosTipoIncidencia);
-			if (puntosRestantes.compareTo(BigDecimal.ZERO) < 0) {
+			if (puntosRestantes.compareTo(BigDecimal.ZERO) <= 0) {
 				throw new IncidentException(IncidentError.NOT_AVAILABLE_POINTS);
 			}
 			
