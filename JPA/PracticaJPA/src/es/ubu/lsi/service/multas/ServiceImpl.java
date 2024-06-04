@@ -25,7 +25,6 @@ public class ServiceImpl extends PersistenceService implements Service {
 	
 	private static Logger logger = LoggerFactory.getLogger(ServiceImpl.class);
 
-
 	@Override
 	public void insertarIncidencia(Date fecha, String nif, long tipo) throws PersistenceException {
 		EntityManager em = this.createSession();
