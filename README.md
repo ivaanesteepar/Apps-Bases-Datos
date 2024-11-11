@@ -1,4 +1,4 @@
-# Apps-Bases-Datos
-Prácticas de Aplicaciones de Bases de Datos
-\
-Miembros del grupo: Iván Estépar Rebollo, Jimena Arnaiz González y Carla Saiz Delgado
+# Aplicaciones de Bases de Datos
+Practices of the subject of Database Applications at the UBU.
+<br>
+Final grade: 8.3 out of 10
