@@ -4,6 +4,6 @@
 
 <p>In this subject, there are 3 practical assignments (PLSQL, JDBC, and JPA), each followed by an exam in which you need to score at least a 5 in each one.</p>
 
-<p>The 3 assignments are done in Java.</p>
+<p>The 3 assignments are done in Java in groups of 3.</p>
 
 <p><strong>Final grade:</strong> 8.3 out of 10</p>
