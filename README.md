@@ -2,7 +2,7 @@
 
 <p>Practices of the subject of Database Applications at the UBU.</p>
 
-<p>In this subject, there are 3 practical assignments (PLSQL, JDBC, and JPA), each followed by an exam in which you need to score at least a 5 in each one.</p>
+<p>In this subject, there are 3 practical assignments (PLSQL, JDBC and JPA), each followed by an exam in which you need to score at least a 5 in each one.</p>
 
 <p>The 3 assignments are done in Java in groups of 3.</p>
 
